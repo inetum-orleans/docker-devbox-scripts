@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-if [[ -n "${DOCKER_DEVBOX_SSL}" && "${DOCKER_DEVBOX_SSL}" == "mkcert" ]]; then
+if [[ -n "${DOCKER_DEVBOX_SSL}" ]]; then
+  # Mkcert is used standalone and with cfssl to install root CA
   MKCERT=$(command -v mkcert)
 
   if [ ! -x "$MKCERT" ]; then

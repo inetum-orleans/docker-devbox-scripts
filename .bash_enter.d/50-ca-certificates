@@ -23,18 +23,29 @@ if [ -n "$DOCKER_DEVBOX_CA_CERTIFICATES" ]; then
       FILE_COUNT=$((FILE_COUNT+1))
     done
   fi
-
-  MKCERT=$(command -v mkcert)
-
-  if [ -x "$MKCERT" ]; then
-    cp "$(mkcert -CAROOT)/rootCA.pem" "$CA_CERTIFICATES_DIR"/mkcert-ca.pem
-    echo "$(tput setaf 2)mkcert-ca.pem$(tput sgr0)"
-    FILE_COUNT=$((FILE_COUNT+1))
-  fi
-
-  if [ "$FILE_COUNT" -eq "0" ]; then
-    echo "$(tput setaf 3)No certificates found.$(tput sgr0)"
-    echo "$(tput setaf 3)Creating .gitempty file$(tput sgr0)"
-    touch "$CA_CERTIFICATES_DIR/.gitempty"
-  fi
 fi
+
+MKCERT=$(command -v mkcert)
+
+if [ -x "$MKCERT" ]; then
+  if [ ! -f "$(mkcert -CAROOT)/rootCA.pem" ]; then
+    mkcert -install
+  fi
+
+  cp "$(mkcert -CAROOT)/rootCA.pem" "$CA_CERTIFICATES_DIR"/mkcert-ca.pem
+  echo "$(tput setaf 2)mkcert-ca.pem$(tput sgr0)"
+  FILE_COUNT=$((FILE_COUNT+1))
+fi
+
+if [ -f "$DOCKER_DEVBOX_CERTS_PATH/cfssl-ca/rootCA.pem" ]; then
+  cp "$DOCKER_DEVBOX_CERTS_PATH/cfssl-ca/rootCA.pem" "$CA_CERTIFICATES_DIR"/cfssl-ca.pem
+  echo "$(tput setaf 2)cfssl-ca.pem$(tput sgr0)"
+  FILE_COUNT=$((FILE_COUNT+1))
+fi
+
+if [ "$FILE_COUNT" -eq "0" ]; then
+  echo "$(tput setaf 3)No certificates found.$(tput sgr0)"
+  echo "$(tput setaf 3)Creating .gitempty file$(tput sgr0)"
+  touch "$CA_CERTIFICATES_DIR/.gitempty"
+fi
+

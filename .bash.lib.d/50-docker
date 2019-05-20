@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-. "$DOCKER_DEVBOX_SCRIPTS_PATH/.bash.lib.d/20-utils"
+. "${DOCKER_DEVBOX_SCRIPTS_PATH-$DOCKER_DEVBOX_SCRIPTS_PATH_STAGING}/.bash.lib.d/20-utils"
 
 _docker_workdir() {
   CONTAINER_PROJECT_DIR="$1"

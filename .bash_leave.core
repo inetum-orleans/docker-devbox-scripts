@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 echo "$(tput setaf 3)Unloading environment $(tput sgr0)"
-if [ -d "$DOCKER_DEVBOX_SCRIPTS_PATH"/.bash.lib.d ]; then
-  for lib_script in "$DOCKER_DEVBOX_SCRIPTS_PATH"/.bash.lib.d/*; do
+if [ -d "$DOCKER_DEVBOX_SCRIPTS_PATH_STAGING"/.bash.lib.d ]; then
+  for lib_script in "$DOCKER_DEVBOX_SCRIPTS_PATH_STAGING"/.bash.lib.d/*; do
     # shellcheck source=/dev/null
     . "$lib_script"
   done
 fi
 
-if [ -d "$DOCKER_DEVBOX_SCRIPTS_PATH"/.bash_leave.d ]; then
-  for leave_script in "$DOCKER_DEVBOX_SCRIPTS_PATH"/.bash_leave.d/*; do
+if [ -d "$DOCKER_DEVBOX_SCRIPTS_PATH_STAGING"/.bash_leave.d ]; then
+  for leave_script in "$DOCKER_DEVBOX_SCRIPTS_PATH_STAGING"/.bash_leave.d/*; do
     echo "$(tput bold)$(tput setaf 6)[.bash_leave.d/$(basename "$leave_script")]$(tput sgr0)$(tput setaf 7)"
     # shellcheck source=/dev/null
     . "$leave_script"
