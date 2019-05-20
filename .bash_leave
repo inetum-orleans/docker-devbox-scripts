@@ -5,20 +5,16 @@ if [ "$SOURCE" = "-bash" ]; then
   SOURCE="${BASH_SOURCE[0]}"
 fi
 
-if [ "$(basename "$SOURCE")" = .bash_enter ]; then
-  DOCKER_DEVBOX_DIR="$(readlink -f "$SOURCE" | xargs dirname)"
-else
-  DOCKER_DEVBOX_DIR="$PWD"
-fi
-
 DOCKER_DEVBOX_HOME_STAGING="${DOCKER_DEVBOX_HOME:-$HOME/.docker-devbox}"
 DOCKER_DEVBOX_SCRIPTS_PATH_STAGING="${DOCKER_DEVBOX_SCRIPTS_PATH:-$DOCKER_DEVBOX_HOME_STAGING/scripts}"
 
 if [ -e "${DOCKER_DEVBOX_SCRIPTS_PATH_STAGING}" ]; then
-  if [ "$(basename "$SOURCE")" = .bash_leave ]; then
-    DOCKER_DEVBOX_DIR="$(readlink -f "$SOURCE" | xargs dirname)"
-  else
-    DOCKER_DEVBOX_DIR="$PWD"
+  if [ -n "${DOCKER_DEVBOX_DIR}" ]; then
+    if [ "$(basename "$SOURCE")" = ".bash_leave" ]; then
+      DOCKER_DEVBOX_DIR="$(readlink -f "$SOURCE" | xargs dirname)"
+    else
+      DOCKER_DEVBOX_DIR="$PWD"
+    fi
   fi
 
   # shellcheck source=/dev/null

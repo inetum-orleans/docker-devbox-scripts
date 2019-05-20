@@ -9,12 +9,6 @@ if [ -n "${DOCKER_DEVBOX_DIR}" ]; then
   SHOULD_EXECUTE_BASH_LEAVE=1
 fi
 
-if [ "$(basename "$SOURCE")" = .bash_enter ]; then
-  DOCKER_DEVBOX_DIR="$(readlink -f "$SOURCE" | xargs dirname)"
-else
-  DOCKER_DEVBOX_DIR="$PWD"
-fi
-
 DOCKER_DEVBOX_HOME_STAGING="${DOCKER_DEVBOX_HOME:-$HOME/.docker-devbox}"
 DOCKER_DEVBOX_SCRIPTS_PATH_STAGING="${DOCKER_DEVBOX_SCRIPTS_PATH:-$DOCKER_DEVBOX_HOME_STAGING/scripts}"
 
@@ -23,6 +17,12 @@ if [ -e "${DOCKER_DEVBOX_SCRIPTS_PATH_STAGING}" ]; then
     # shellcheck source=/dev/null
     . "$DOCKER_DEVBOX_DIR"/.bash_leave
     unset SHOULD_EXECUTE_BASH_LEAVE
+  fi
+
+  if [ "$(basename "$SOURCE")" = ".bash_enter" ]; then
+    DOCKER_DEVBOX_DIR="$(readlink -f "$SOURCE" | xargs dirname)"
+  else
+    DOCKER_DEVBOX_DIR="$PWD"
   fi
 
   # shellcheck source=/dev/null
