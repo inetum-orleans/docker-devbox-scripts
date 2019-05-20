@@ -2,18 +2,18 @@
 
 CA_CERTIFICATES_DIR="$DOCKER_DEVBOX_DIR/.docker/.ca-certificates"
 FILE_COUNT=0
+rm -Rf "/${CA_CERTIFICATES_DIR:?}"
 
 if [ -n "$DOCKER_DEVBOX_CA_CERTIFICATES" ]; then
-  rm -Rf "/${CA_CERTIFICATES_DIR:?}"
-  mkdir -p "/${CA_CERTIFICATES_DIR:?}"
-
-  rm -f "$CA_CERTIFICATES_DIR/.empty"
-
   for CERT in $DOCKER_DEVBOX_CA_CERTIFICATES; do
+    mkdir -p "/${CA_CERTIFICATES_DIR:?}"
+    rm -f "$CA_CERTIFICATES_DIR/.empty"
     cp -L "$CERT" "$CA_CERTIFICATES_DIR"
   done
 
   for pem in "$CA_CERTIFICATES_DIR"/*.pem; do
+    mkdir -p "/${CA_CERTIFICATES_DIR:?}"
+    rm -f "$CA_CERTIFICATES_DIR/.empty"
     mv "$pem" "$CA_CERTIFICATES_DIR/$(basename "$pem" .pem).crt"
   done
 
@@ -32,12 +32,16 @@ if [ -x "$MKCERT" ]; then
     mkcert -install
   fi
 
+  mkdir -p "/${CA_CERTIFICATES_DIR:?}"
+  rm -f "$CA_CERTIFICATES_DIR/.empty"
   cp "$(mkcert -CAROOT)/rootCA.pem" "$CA_CERTIFICATES_DIR"/mkcert-ca.pem
   echo "$(tput setaf 2)mkcert-ca.pem$(tput sgr0)"
   FILE_COUNT=$((FILE_COUNT+1))
 fi
 
 if [ -f "$DOCKER_DEVBOX_CERTS_PATH/cfssl-ca/rootCA.pem" ]; then
+  mkdir -p "/${CA_CERTIFICATES_DIR:?}"
+  rm -f "$CA_CERTIFICATES_DIR/.empty"
   cp "$DOCKER_DEVBOX_CERTS_PATH/cfssl-ca/rootCA.pem" "$CA_CERTIFICATES_DIR"/cfssl-ca.pem
   echo "$(tput setaf 2)cfssl-ca.pem$(tput sgr0)"
   FILE_COUNT=$((FILE_COUNT+1))
