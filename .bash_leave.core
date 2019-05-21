@@ -16,3 +16,5 @@ if [ -d "$DOCKER_DEVBOX_SCRIPTS_PATH_STAGING"/.bash_leave.d ]; then
     tput sgr0
   done
 fi
+
+unset DOCKER_DEVBOX_DIR
