@@ -10,25 +10,25 @@ _docker_workdir() {
 
 _docker_find_service_image() {
     SERVICE="$1"
-    50-docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Config.Image'
+    docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Config.Image'
 }
 
 _docker_find_service_user() {
     SERVICE="$1"
-    50-docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Config.User'
+    docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Config.User'
 }
 
 _docker_find_service_networks() {
     SERVICE="$1"
-    50-docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].NetworkSettings.Networks | keys |  join(" ")'
+    docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].NetworkSettings.Networks | keys |  join(" ")'
 }
 
 _docker_find_service_volumes() {
     SERVICE="$1"
-    50-docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Mounts[] | [if (.Type == "volume") then .Name else .Source end, .Destination, .Mode] | join(":")'
+    docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Mounts[] | [if (.Type == "volume") then .Name else .Source end, .Destination, .Mode] | join(":")'
 }
 
 _docker_find_image_entrypoint() {
     IMAGE="$1"
-    50-docker inspect "${IMAGE}" | jq -r '.[0].Config.Entrypoint | join(" ")'
+    docker inspect "${IMAGE}" | jq -r '.[0].Config.Entrypoint | join(" ")'
 }
