@@ -6,7 +6,7 @@ autostash GROUP_ID="$(id -g)"
 autostash USER_NAME="$(id -un)"
 autostash GROUP_NAME="$(id -gn)"
 autostash DOCKER_DEVBOX_IP="$(ip addr show dev docker0 | grep -o "inet [0-9]*\.[0-9]*\.[0-9]*\.[0-9]*" | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*")"
-autostash HOST_IP="${HOST_IP-${DOCKER_DEVBOX_IP}}"
+autostash HOST_IP="${HOST_IP:-${DOCKER_DEVBOX_IP}}"
 
 # shellcheck disable=SC2153
 autostash COMPOSE_PROJECT_DIR="$DOCKER_DEVBOX_DIR"
