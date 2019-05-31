@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [ ! -e "$DOCKER_DEVBOX_DIR/.docker/fixuid.tar.gz" ]; then
+   mkdir -p "$DOCKER_DEVBOX_DIR/.docker"
+   echo "$(tput setaf 3)fixuid is not available. Downloading package ...$(tput sgr0)"
+   curl -fsSL -o "$DOCKER_DEVBOX_DIR/.docker/fixuid.tar.gz" "https://github.com/boxboat/fixuid/releases/download/v0.4/fixuid-0.4-linux-amd64.tar.gz"
+fi
