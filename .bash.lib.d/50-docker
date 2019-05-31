@@ -30,10 +30,22 @@ _docker_find_service_volumes() {
 
 _docker_find_image_entrypoint() {
     IMAGE="$1"
-    docker inspect "${IMAGE}" | jq -r '.[0].Config.Entrypoint'
+    r=$(docker inspect "${IMAGE}")
+    if [[ $? != 0 ]]; then
+        docker pull "${IMAGE}"
+        echo "Pull image ${IMAGE}..."
+        r=$(docker inspect "${IMAGE}")
+    fi
+    echo "$r" | jq -r '.[0].Config.Entrypoint'
 }
 
 _docker_find_image_cmd() {
     IMAGE="$1"
-    docker inspect "${IMAGE}" | jq -r '.[0].Config.Cmd'
+    r=$(docker inspect "${IMAGE}")
+    if [[ $? != 0 ]]; then
+        docker pull "${IMAGE}"
+        echo "Pull image ${IMAGE}..."
+        r=$(docker inspect "${IMAGE}")
+    fi
+    echo "$r" | jq -r '.[0].Config.Cmd'
 }
