@@ -2,6 +2,7 @@
 . "$DOCKER_DEVBOX_SCRIPTS_PATH/.bash.lib.d/50-docker"
 
 for DOCKERFILE in "${DOCKER_DEVBOX_DIR}/.docker/"**/Dockerfile; do
+  [[ -e "$DOCKERFILE" ]] || continue
   if grep -Eq ".*fixuid.*?\.tar\.gz" "$DOCKERFILE"; then
     entrypoint=$(cat "$DOCKERFILE" | sed -rn 's!(ENTRYPOINT )(.*)!\2!p')
     image_entrypoint=$(echo $entrypoint | jq -Mc '. as $entrypoint | select($entrypoint[0] != "fixuid") | $entrypoint')
