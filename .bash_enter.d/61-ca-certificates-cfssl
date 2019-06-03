@@ -5,7 +5,7 @@ if [[ "$SHOULD_COPY_CFSSL_CA_CERTIFICATE" == "1" ]]; then
   if [[ -f "$DOCKER_DEVBOX_CERTS_PATH/cfssl-ca/rootCA.pem" ]]; then
     mkdir -p "/${CA_CERTIFICATES_DIR:?}"
     cp "$DOCKER_DEVBOX_CERTS_PATH/cfssl-ca/rootCA.pem" "$CA_CERTIFICATES_DIR"/cfssl-ca.pem
-    echo "$(tput setaf 2)CFSSL CA Certificate has been copied to docker build context (cfssl-ca.pem)$(tput sgr0)"
+    echo "$(tput setaf 2)CFSSL CA Certificate is available to docker build context (cfssl-ca.pem)$(tput sgr0)"
   else
     echo "$(tput setaf 1)CFSSL CA Certificate is missing. Check docker-devbox installation.$(tput sgr0)"
   fi

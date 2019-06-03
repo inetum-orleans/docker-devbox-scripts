@@ -15,10 +15,17 @@ for DOMAIN in $(dc config | sed -n -e 's/\s*VIRTUAL_HOST: //p'); do
   CERT_CRT_DEST="${DOCKER_DEVBOX_CERTS_PATH}/${DOMAIN}.crt"
 
   if _cp_file_if_different "$CERT_KEY" "$CERT_KEY_DEST"; then
+    echo "$(tput setaf 2)$(_utils_relative_path "$CERT_KEY") -> "$CERT_KEY_DEST"$(tput sgr0)"
     SHOULD_RESTART_NGINX_PROXY=1
+  else
+    echo "$(tput setaf 7)$(_utils_relative_path "$CERT_KEY") -> "$CERT_KEY_DEST" (unchanged)$(tput sgr0)"
   fi
 
+
   if _cp_file_if_different "$CERT_CRT" "$CERT_CRT_DEST"; then
+    echo "$(tput setaf 2)$(_utils_relative_path "$CERT_CRT") -> "$CERT_CRT_DEST"$(tput sgr0)"
     SHOULD_RESTART_NGINX_PROXY=1
+  else
+    echo "$(tput setaf 7)$(_utils_relative_path "$CERT_CRT") -> "$CERT_CRT_DEST" (unchanged)$(tput sgr0)"
   fi
 done

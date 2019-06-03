@@ -22,7 +22,7 @@ if [[ -n "${DOCKER_DEVBOX_SSL}" && "${DOCKER_DEVBOX_SSL}" == "cfssl-cli" ]]; the
         if [[ ! -f "$DESTINATION_CRT" ]] || [[ ! -f "$DESTINATION_KEY" ]]; then
           mkdir -p "$DESTINATION"
 
-          echo "$(tput setaf 3)Generating project certificate for ${DOMAIN} with cfssl-cli$(tput sgr0)"
+          echo "$(tput setaf 3)Generating project certificate (${DOMAIN})$(tput sgr0)"
           # shellcheck disable=SC2086
           if cfssl-cli gencert ${CONFIG_OPTION} --destination "$DESTINATION" "${DOMAIN}"; then
             echo "$(tput setaf 2)Project certificate has been generated (${DOMAIN})$(tput sgr0)"
@@ -31,7 +31,7 @@ if [[ -n "${DOCKER_DEVBOX_SSL}" && "${DOCKER_DEVBOX_SSL}" == "cfssl-cli" ]]; the
             echo "$(tput setaf 1)Project certificate generation has failed (${DOMAIN})$(tput sgr0)"
           fi
         else
-          echo "$(tput setaf 2)Project certificate exists (${DOMAIN})$(tput sgr0)"
+          echo "$(tput setaf 7)Project certificate exists (${DOMAIN})$(tput sgr0)"
           SHOULD_COPY_CFSSL_CA_CERTIFICATE=1
         fi
       done < <(echo "$RAWDOMAIN" | tr ',' '\n')

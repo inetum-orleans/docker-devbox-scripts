@@ -18,7 +18,7 @@ for ENV in $DOCKER_DEVBOX_ENV_LIST; do
   if [ $ACTIVE_ENV = 1 ]; then
     if [ -f "$DIRNAME/$FILENAME.$ENV.$EXTENSION" ] && { [ ! -f "$DIRNAME/$FILENAME.$EXTENSION" ] || [ -h "$DIRNAME/$FILENAME.$EXTENSION" ]; }; then
       ln -rfs "$DIRNAME/$FILENAME.$ENV.$EXTENSION" "$DIRNAME/$FILENAME.$EXTENSION"
-      MESSAGE="$(tput setaf 2)$(_utils_relative_path "$DIRNAME/$FILENAME.$ENV.$EXTENSION") -> $FILENAME.$EXTENSION$(tput sgr0)"
+      MESSAGE="$(tput setaf 2)$(_utils_relative_path "$DIRNAME/$FILENAME.$ENV.$EXTENSION") -> $FILENAME.$EXTENSION (symlink)$(tput sgr0)"
       break
     fi
   fi

@@ -2,6 +2,8 @@
 
 if [[ -z "$DOCKER_DEVBOX_DISABLE_COPY_CA_CERTIFICATES" ]]; then
   CA_CERTIFICATES_DIR="$DOCKER_DEVBOX_DIR/.docker/.ca-certificates"
+  CA_CERTIFICATES_MANUAL_DIR="$CA_CERTIFICATES_DIR.manual"
+
   rm -Rf "/${CA_CERTIFICATES_DIR:?}"
 
   if [[ -n "$DOCKER_DEVBOX_CA_CERTIFICATES" ]]; then
@@ -9,15 +11,19 @@ if [[ -z "$DOCKER_DEVBOX_DISABLE_COPY_CA_CERTIFICATES" ]]; then
       mkdir -p "/${CA_CERTIFICATES_DIR:?}"
       cp -L "$CERT" "$CA_CERTIFICATES_DIR"
     done
+  fi
 
-    for pem in "$CA_CERTIFICATES_DIR"/*.pem; do
+  if [[ -d "$CA_CERTIFICATES_MANUAL_DIR" ]]; then
+    for CERT in "$CA_CERTIFICATES_MANUAL_DIR"/*; do
       mkdir -p "/${CA_CERTIFICATES_DIR:?}"
-      mv "$pem" "$CA_CERTIFICATES_DIR/$(basename "$pem" .pem).crt"
+      cp -L "$CERT" "$CA_CERTIFICATES_DIR"
     done
+  fi
 
+  if [[ -d $CA_CERTIFICATES_DIR ]]; then
     if [[ -n "$(ls -A "$CA_CERTIFICATES_DIR")" ]]; then
       for cert in "$CA_CERTIFICATES_DIR"/*; do
-        echo "$(tput setaf 2)CA Certificate has been copied to docker build context ($(basename "$cert"))$(tput sgr0)"
+        echo "$(tput setaf 2)CA Certificate is available in build context ($(basename "$cert"))$(tput sgr0)"
       done
     fi
   fi
