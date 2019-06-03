@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+CA_CERTIFICATES_DIR="$DOCKER_DEVBOX_DIR/.docker/.ca-certificates"
+
+if [[ -d "$CA_CERTIFICATES_DIR" && -z "$DOCKER_DEVBOX_DISABLE_COPY_CA_CERTIFICATES" ]]; then
+    autostash DOCKER_DEVBOX_COPY_CA_CERTIFICATES=1
+else
+    unset DOCKER_DEVBOX_COPY_CA_CERTIFICATES
+fi

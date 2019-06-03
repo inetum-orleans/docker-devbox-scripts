@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+if [[ "${DOCKER_DEVBOX_SSL}" == "cfssl-cli" && -z "$DOCKER_DEVBOX_DISABLE_COPY_CA_CERTIFICATES" && ! -z "$DOCKER_DEVBOX_COPY_SELF_CA_CERTIFICATE" ]]; then
+  CA_CERTIFICATES_DIR="$DOCKER_DEVBOX_DIR/.docker/.ca-certificates"
+
+  if [ -f "$DOCKER_DEVBOX_CERTS_PATH/cfssl-ca/rootCA.pem" ]; then
+    mkdir -p "/${CA_CERTIFICATES_DIR:?}"
+    rm -f "$CA_CERTIFICATES_DIR/.empty"
+    cp "$DOCKER_DEVBOX_CERTS_PATH/cfssl-ca/rootCA.pem" "$CA_CERTIFICATES_DIR"/cfssl-ca.pem
+    echo "$(tput setaf 2)cfssl-ca.pem$(tput sgr0)"
+  fi
+
+  if [ "$FILE_COUNT" -eq "0" ]; then
+    echo "$(tput setaf 3)No certificates found.$(tput sgr0)"
+    echo "$(tput setaf 3)Creating .gitempty file$(tput sgr0)"
+    touch "$CA_CERTIFICATES_DIR/.gitempty"
+  fi
+fi
