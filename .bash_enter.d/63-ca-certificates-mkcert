@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
-
-if [[ "${DOCKER_DEVBOX_SSL}" == "mkcert" && -z "$DOCKER_DEVBOX_DISABLE_COPY_CA_CERTIFICATES" && ! -z "$DOCKER_DEVBOX_COPY_SELF_CA_CERTIFICATE" ]]; then
+if [[ "$SHOULD_COPY_MKCERT_CA_CERTIFICATE" == "1" ]]; then
   CA_CERTIFICATES_DIR="$DOCKER_DEVBOX_DIR/.docker/.ca-certificates"
-  MKCERT=$(command -v mkcert)
+  MKCERT_EXE=$(command -v mkcert)
 
-  if [ -x "$MKCERT" ]; then
-    if [ ! -f "$(mkcert -CAROOT)/rootCA.pem" ]; then
+  if [[ -x "$MKCERT_EXE" ]]; then
+    if [[ ! -f "$(mkcert -CAROOT)/rootCA.pem" ]]; then
       mkcert -install
     fi
 
     mkdir -p "/${CA_CERTIFICATES_DIR:?}"
-    rm -f "$CA_CERTIFICATES_DIR/.empty"
     cp "$(mkcert -CAROOT)/rootCA.pem" "$CA_CERTIFICATES_DIR"/mkcert-ca.pem
-    echo "$(tput setaf 2)mkcert-ca.pem$(tput sgr0)"
+    echo "$(tput setaf 2)Mkcert CA Certificate has been copied to docker build context (mkcert-ca.pem)$(tput sgr0)"
   fi
 fi

@@ -15,9 +15,9 @@ if [[ -z "$DOCKER_DEVBOX_DISABLE_COPY_CA_CERTIFICATES" ]]; then
       mv "$pem" "$CA_CERTIFICATES_DIR/$(basename "$pem" .pem).crt"
     done
 
-    if [ -n "$(ls -A "$CA_CERTIFICATES_DIR")" ]; then
+    if [[ -n "$(ls -A "$CA_CERTIFICATES_DIR")" ]]; then
       for cert in "$CA_CERTIFICATES_DIR"/*; do
-        echo "$(tput setaf 2)$(basename "$cert")$(tput sgr0)"
+        echo "$(tput setaf 2)CA Certificate has been copied to docker build context ($(basename "$cert"))$(tput sgr0)"
       done
     fi
   fi
