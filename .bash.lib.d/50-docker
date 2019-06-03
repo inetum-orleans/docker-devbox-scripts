@@ -2,50 +2,106 @@
 . "${DOCKER_DEVBOX_SCRIPTS_PATH:-$DOCKER_DEVBOX_SCRIPTS_PATH_STAGING}/.bash.lib.d/20-utils"
 
 _docker_workdir() {
-  CONTAINER_PROJECT_DIR="$1"
-  RELATIVE_PATH=$(_utils_relative_path "$PWD")
-  CONTAINER_PWD="$CONTAINER_PROJECT_DIR$RELATIVE_PATH"
-  echo "$CONTAINER_PWD"
+  local CONTAINER_PROJECT_DIR="$1"
+  local __ret=$2
+
+  local RELATIVE_PATH=$(_utils_relative_path "$PWD")
+  local CONTAINER_PWD="$CONTAINER_PROJECT_DIR$RELATIVE_PATH"
+  local ret="$CONTAINER_PWD"
+
+  if [[ "$__ret" ]]; then
+    eval $__ret="'$ret'"
+  else
+    echo "$ret"
+  fi
 }
 
 _docker_find_service_image() {
-    SERVICE="$1"
-    docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Config.Image'
+    local SERVICE="$1"
+    local __ret=$2
+    local ret=$(docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Config.Image')
+
+    if [[ "$__ret" ]]; then
+        eval $__ret="'$ret'"
+    else
+        echo "$ret"
+    fi
 }
 
 _docker_find_service_user() {
-    SERVICE="$1"
-    docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Config.User'
+    local SERVICE="$1"
+    local __ret=$2
+    local ret=$(docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Config.User')
+
+    if [[ "$__ret" ]]; then
+        eval $__ret="'$ret'"
+    else
+        echo "$ret"
+    fi
 }
 
 _docker_find_service_networks() {
-    SERVICE="$1"
-    docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].NetworkSettings.Networks | keys |  join(" ")'
+    local SERVICE="$1"
+    local __ret=$2
+    local ret=$(docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].NetworkSettings.Networks | keys |  join(" ")')
+
+    if [[ "$__ret" ]]; then
+        eval $__ret="'$ret'"
+    else
+        echo "$ret"
+    fi
 }
 
 _docker_find_service_volumes() {
-    SERVICE="$1"
-    docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Mounts[] | [if (.Type == "volume") then .Name else .Source end, .Destination, .Mode] | join(":")'
+    local SERVICE="$1"
+    local __ret=$2
+    local ret=$(docker inspect "$(docker-compose ps -q "${SERVICE}")" | jq -r '.[0].Mounts[] | [if (.Type == "volume") then .Name else .Source end, .Destination, .Mode] | join(":")')
+
+    if [[ "$__ret" ]]; then
+        eval $__ret="'$ret'"
+    else
+        echo "$ret"
+    fi
 }
 
 _docker_find_image_entrypoint() {
-    IMAGE="$1"
-    r=$(docker inspect "${IMAGE}")
-    if [[ $? != 0 ]]; then
+    local IMAGE="$1"
+    local __ret=$2
+    r=$(docker image inspect "${IMAGE}" 2> /dev/null)
+    if [[ $? != "0" ]]; then
+        if [[ ! -z "$__ret" ]]; then
+            echo "$(tput setaf 3)Pulling image ${IMAGE} to find Entrypoint.$(tput sgr0)"
+        fi
         docker pull "${IMAGE}"
-        echo "Pull image ${IMAGE}..."
-        r=$(docker inspect "${IMAGE}")
+        r=$(docker image inspect "${IMAGE}")
     fi
-    echo "$r" | jq -r '.[0].Config.Entrypoint'
+
+    local ret=$(echo "$r" | jq -er '.[0].Config.Entrypoint')
+
+    if [[ "$__ret" ]]; then
+        eval $__ret="'$ret'"
+    else
+        echo "$ret"
+    fi
 }
 
 _docker_find_image_cmd() {
-    IMAGE="$1"
-    r=$(docker inspect "${IMAGE}")
-    if [[ $? != 0 ]]; then
+    local IMAGE="$1"
+    local __ret=$2
+    r=$(docker image inspect "${IMAGE}" 2> /dev/null)
+    if [[ $? != "0" ]]; then
+        if [[ ! -z "$__ret" ]]; then
+            echo "$(tput setaf 3)Pulling image ${IMAGE} to find Cmd.$(tput sgr0)"
+        fi
         docker pull "${IMAGE}"
-        echo "Pull image ${IMAGE}..."
-        r=$(docker inspect "${IMAGE}")
+        r=$(docker image inspect "${IMAGE}")
     fi
-    echo "$r" | jq -r '.[0].Config.Cmd'
+
+    local ret=$(echo "$r" | jq -er '.[0].Config.Cmd')
+
+    if [[ "$__ret" ]]; then
+        eval $__ret="'$ret'"
+    else
+        echo "$ret"
+    fi
 }

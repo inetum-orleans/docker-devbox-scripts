@@ -4,12 +4,14 @@
 for DOCKERFILE in "${DOCKER_DEVBOX_DIR}/.docker/"**/Dockerfile; do
   [[ -e "$DOCKERFILE" ]] || continue
   if grep -Eq ".*fixuid.*?\.tar\.gz" "$DOCKERFILE"; then
+    echo "$(tput setaf 2)Generating fixuid ENTRYPOINT/CMD for $(_utils_relative_path ${DOCKERFILE}) ...$(tput sgr0)"
+
     entrypoint=$(cat "$DOCKERFILE" | sed -rn 's!(ENTRYPOINT )(.*)!\2!p')
-    image_entrypoint=$(echo $entrypoint | jq -Mc '. as $entrypoint | select($entrypoint[0] != "fixuid") | $entrypoint')
+    image_entrypoint=$(echo "$entrypoint" | jq -Mc '. as $entrypoint | select($entrypoint[0] != "fixuid") | $entrypoint')
 
     if [[ -z "$image_entrypoint" ]]; then
       image=$(cat "$DOCKERFILE" | sed -rn 's!(FROM )(.*)!\2!p')
-      image_entrypoint=$(_docker_find_image_entrypoint "$image")
+      _docker_find_image_entrypoint "$image" image_entrypoint
     fi
 
     fixuid_entrypoint=$(echo "$image_entrypoint" | jq -Mc '. |= ["fixuid", "-q"] + .')
@@ -17,7 +19,7 @@ for DOCKERFILE in "${DOCKER_DEVBOX_DIR}/.docker/"**/Dockerfile; do
     image_cmd=$(cat "$DOCKERFILE" | sed -rn 's!(CMD )(.*)!\2!p')
     if [[ -z "$image_cmd" ]]; then
       image=$(cat "$DOCKERFILE" | sed -rn 's!(FROM )(.*)!\2!p')
-      image_cmd=$(_docker_find_image_cmd "$image")
+      _docker_find_image_cmd "$image" image_cmd
     fi
 
     image_cmd=$(echo "$image_cmd" | jq -Mc '.')
@@ -25,12 +27,14 @@ for DOCKERFILE in "${DOCKER_DEVBOX_DIR}/.docker/"**/Dockerfile; do
     if [[ ! $(cat "$DOCKERFILE" | sed -rn 's!(ENTRYPOINT )(.*)!\1'"$fixuid_entrypoint"'!') > "$DOCKERFILE.sed" && ! -z "$fixuid_entrypoint" ]]; then
       rm -f "$DOCKERFILE.sed"
       echo "ENTRYPOINT $fixuid_entrypoint" >> "$DOCKERFILE"
+      echo "$(tput setaf 3)ENTRYPOINT $fixuid_entrypoint ($(_utils_relative_path ${DOCKERFILE}))$(tput sgr0)"
     else
       mv -f "$DOCKERFILE.sed" "$DOCKERFILE"
     fi
     if [[ ! $(cat "$DOCKERFILE" | sed -rn 's!(CMD )(.*)!\1'"$image_cmd"'!' > "$DOCKERFILE.sed") && ! -z "$image_cmd" ]]; then
       rm -f "$DOCKERFILE.sed"
       echo "CMD $image_cmd" >> "$DOCKERFILE"
+      echo "$(tput setaf 3)CMD $image_cmd ($(_utils_relative_path ${DOCKERFILE}))$(tput sgr0)"
     else
       mv -f "$DOCKERFILE.sed" "$DOCKERFILE"
     fi

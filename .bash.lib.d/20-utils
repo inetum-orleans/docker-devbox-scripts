@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
 _utils_relative_path() {
-  ABSOLUTE_PATH="$1"
-  RELATIVE_PATH=$(echo "$ABSOLUTE_PATH" | sed "s;$DOCKER_DEVBOX_DIR;;g")
-  echo "$RELATIVE_PATH"
+  local ABSOLUTE_PATH="$1"
+  local __ret=$2
+  local ret=$(echo "$ABSOLUTE_PATH" | sed -E "s;""$DOCKER_DEVBOX_DIR""[/\\]?;;g")
+
+  if [[ "$__ret" ]]; then
+    eval $__ret="'$ret'"
+  else
+    echo "$ret"
+  fi
 }
 
 _cp_file_if_different() {
