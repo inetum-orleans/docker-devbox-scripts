@@ -23,7 +23,7 @@ if [[ -n "${DOCKER_DEVBOX_SSL}" && "${DOCKER_DEVBOX_SSL}" == "cfssl-cli" ]]; the
           mkdir -p "$DESTINATION"
 
           echo "$(tput setaf 3)Generating project certificate (${DOMAIN})$(tput sgr0)"
-          # shellcheck disable=SC2086
+
           if cfssl-cli gencert ${CONFIG_OPTION} --destination "$DESTINATION" "${DOMAIN}"; then
             echo "$(tput setaf 2)Project certificate has been generated (${DOMAIN})$(tput sgr0)"
             SHOULD_COPY_CFSSL_CA_CERTIFICATE=1

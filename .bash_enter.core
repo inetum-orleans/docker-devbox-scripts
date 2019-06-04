@@ -2,13 +2,11 @@
 
 echo "$(tput setaf 3)Loading environment $(tput sgr0)"
 for lib_script in `{ ls "$DOCKER_DEVBOX_DIR"/.bash.lib.d/* 2>/dev/null; ls "$DOCKER_DEVBOX_SCRIPTS_PATH_STAGING"/.bash.lib.d/* 2>/dev/null; } | sed 's|\(.*\)/|\1'$'\t''|' | sort -s -t$'\t' -k+2n | uniq -f1 | sed 's|'$'\t''|/|'`; do
-  # shellcheck source=/dev/null
   . "$lib_script"
 done
 
 for enter_script in `{ ls "$DOCKER_DEVBOX_DIR"/.bash_enter.d/* 2>/dev/null; ls "$DOCKER_DEVBOX_SCRIPTS_PATH_STAGING"/.bash_enter.d/* 2>/dev/null; } | sed 's|\(.*\)/|\1'$'\t''|' | sort -s -t$'\t' -k+2n | uniq -f1 | sed 's|'$'\t''|/|'`; do
   echo "$(tput bold)$(tput setaf 6)[.bash_enter.d/$(basename "$enter_script")]$(tput sgr0)$(tput setaf 7)"
-  # shellcheck source=/dev/null
   . "$enter_script"
   tput sgr0
 done

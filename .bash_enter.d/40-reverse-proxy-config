@@ -26,16 +26,13 @@ for DOMAIN in $(dc config | sed -n -e 's/\s*VIRTUAL_HOST: //p'); do
 EOF
     fi
     for TRAEFIK_FILE in "$PROJECT_TRAEFIK_PATH"/*; do
-      # shellcheck disable=SC2001
       TRAEFIK_FILE_DEST_BASENAME=$(basename "$(echo "$TRAEFIK_FILE" | sed -e 's/\[domain\]/'"${DOCKER_DEVBOX_DOMAIN_PREFIX}.${DOCKER_DEVBOX_DOMAIN}"'/g')")
-
       _cp_file_if_different "$TRAEFIK_FILE" "$DOCKER_DEVBOX_TRAEFIK_PATH/config/$TRAEFIK_FILE_DEST_BASENAME"
     done
   fi
 
   if [ -e "${DOCKER_DEVBOX_NGINX_PROXY_PATH}" ]; then
     for VHOST_CONF in "$PROJECT_NGINX_PROXY_PATH"/*; do
-      # shellcheck disable=SC2001
       VHOST_CONF_DEST_BASENAME=$(basename "$(echo "$VHOST_CONF" | sed -e 's/\[domain\]/'"${DOCKER_DEVBOX_DOMAIN_PREFIX}.${DOCKER_DEVBOX_DOMAIN}"'/g')")
 
       if [[ "$DOMAIN" == "$VHOST_CONF_DEST_BASENAME" ]]; then

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=SC2034
 SHOULD_RESTART_NGINX_PROXY=0
 
 PROJECT_CERTS="$DOCKER_DEVBOX_DIR/.certs"

@@ -14,7 +14,7 @@ if [[ -n "${DOCKER_DEVBOX_SSL}" && "${DOCKER_DEVBOX_SSL}" == "mkcert" ]]; then
         if [[ ! -f "$DESTINATION_CRT" ]] || [[ ! -f "$DESTINATION_KEY" ]]; then
           mkdir -p "$DESTINATION"
           echo "$(tput setaf 3)Generating project certificate (${DOMAIN})$(tput sgr0)"
-          # shellcheck disable=SC2086
+
           if mkcert -cert-file "$DESTINATION_CRT" -key-file "$DESTINATION_KEY" "${DOMAIN}"; then
             echo "$(tput setaf 2)Project certificate has been generated (${DOMAIN})$(tput sgr0)"
             SHOULD_COPY_MKCERT_CA_CERTIFICATE=1
