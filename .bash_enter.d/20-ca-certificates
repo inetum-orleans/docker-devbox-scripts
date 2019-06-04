@@ -16,10 +16,14 @@ if [[ -z "$DOCKER_DEVBOX_DISABLE_COPY_CA_CERTIFICATES" ]]; then
   if [[ -n "$DOCKER_DEVBOX_CA_CERTIFICATES" ]]; then
     for CERT in $DOCKER_DEVBOX_CA_CERTIFICATES; do
       mkdir -p "/${CA_CERTIFICATES_DIR:?}"
-      if _cp_file_if_different "$CERT" "$CA_CERTIFICATES_DIR/$(basename "$CERT")"; then
-        echo "$(tput setaf 1)CA Certificate provided by DOCKER_DEVBOX_CA_CERTIFICATES doesn't match the one from directory \"$(_utils_relative_path "$CA_CERTIFICATES_MANUAL_DIR")\" ($(basename "$CERT"))$(tput sgr0)"
-        echo "$(tput setaf 3)You should copy the certificate $(basename $CERT) from \"$(_utils_relative_path "$CA_CERTIFICATES_DIR")\" to \"$(_utils_relative_path "$CA_CERTIFICATES_MANUAL_DIR")\"$(tput sgr0)"
-        echo "$(tput setaf 3)If both certificates needs to be kept, you should rename \"$(_utils_relative_path "$CA_CERTIFICATES_MANUAL_DIR")/$(basename "$CERT")\" to avoid this conflict$(tput sgr0)"
+      if [[ -f "$CA_CERTIFICATES_DIR/$(basename "$CERT")" ]]; then
+        if _cp_file_if_different "$CERT" "$CA_CERTIFICATES_DIR/$(basename "$CERT")"; then
+          echo "$(tput setaf 1)CA Certificate provided by DOCKER_DEVBOX_CA_CERTIFICATES doesn't match the one from directory \"$(_utils_relative_path "$CA_CERTIFICATES_MANUAL_DIR")\" ($(basename "$CERT"))$(tput sgr0)"
+          echo "$(tput setaf 3)You should copy the certificate $(basename $CERT) from \"$(_utils_relative_path "$CA_CERTIFICATES_DIR")\" to \"$(_utils_relative_path "$CA_CERTIFICATES_MANUAL_DIR")\"$(tput sgr0)"
+          echo "$(tput setaf 3)If both certificates needs to be kept, you should rename \"$(_utils_relative_path "$CA_CERTIFICATES_MANUAL_DIR")/$(basename "$CERT")\" to avoid this conflict$(tput sgr0)"
+        fi
+      else
+        cp -f "$CERT" "$CA_CERTIFICATES_DIR/$(basename "$CERT")"
       fi
     done
   fi

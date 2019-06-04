@@ -12,19 +12,37 @@ _utils_relative_path() {
   fi
 }
 
+_file_is_different() {
+SRC="$1"
+DEST="$2"
+
+if [[ -f "$SRC" ]] && [[ ! -f "$DEST" ]]; then
+  return 0
+else
+  if [[ ! -f "$SRC" ]] && [[ -f "$DEST" ]]; then
+    return 0
+  else
+    if [[ -f "$SRC" ]] && [[ -f "$DEST" ]] && ! cmp -s "$SRC" "$DEST"; then
+      return 0
+    fi
+  fi
+fi
+
+return 1
+}
 _cp_file_if_different() {
 SRC="$1"
 DEST="$2"
 
-if [ -f "$SRC" ] && [ ! -f "$DEST" ]; then
+if [[ -f "$SRC" ]] && [[ ! -f "$DEST" ]]; then
   cp -f "$SRC" "$DEST"
   return 0
 else
-  if [ ! -f "$SRC" ] && [ -f "$DEST" ]; then
+  if [[ ! -f "$SRC" ]] && [[ -f "$DEST" ]]; then
     rm "$DEST"
     return 0
   else
-    if [ -f "$SRC" ] && [ -f "$DEST" ] && ! cmp -s "$SRC" "$DEST"; then
+    if [[ -f "$SRC" ]] && [[ -f "$DEST" ]] && ! cmp -s "$SRC" "$DEST"; then
       cp -f "$SRC" "$DEST"
       return 0
     fi
