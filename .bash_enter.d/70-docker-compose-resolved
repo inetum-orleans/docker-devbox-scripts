@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Generate resolved
+for DOCKER_COMPOSE_FILE in "${DOCKER_DEVBOX_DIR}"/{docker-compose.*.yml,docker-compose.yml}; do
+  [[ -f "$DOCKER_COMPOSE_FILE" ]] || continue
+  FILENAME=$(basename "${DOCKER_COMPOSE_FILE}")
+  EXTENSION="${FILENAME##*.}"
+  FILENAME="${FILENAME%.*}"
+  RESOLVED_FILENAME=".${FILENAME}.resolved.${EXTENSION}"
+  echo "# This file has been generated from \"${FILENAME}\", it could be used instead when invoking docker-compose remotely" > "${DOCKER_DEVBOX_DIR}/.${FILENAME}.resolved.${EXTENSION}"
+  cat "${DOCKER_COMPOSE_FILE}" | envsubst >> "$RESOLVED_FILENAME"
+  echo "$(tput setaf 2)${DOCKER_COMPOSE_FILE} -> $RESOLVED_FILENAME (resolved)$(tput sgr0)"
+done
