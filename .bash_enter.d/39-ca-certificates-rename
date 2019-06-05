@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+CA_CERTIFICATES_DIR="$DOCKER_DEVBOX_DIR/.docker/.ca-certificates"
+
+for cert in "${CA_CERTIFICATES_DIR}"/*.pem; do
+  if [[ -f "$cert" ]]; then
+    mv "$cert" "${CA_CERTIFICATES_DIR}/$(basename "$cert" .pem).crt"
+  fi
+done
