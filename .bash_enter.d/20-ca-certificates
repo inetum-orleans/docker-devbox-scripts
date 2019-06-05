@@ -4,7 +4,11 @@ if [[ -z "$DOCKER_DEVBOX_DISABLE_COPY_CA_CERTIFICATES" ]]; then
   CA_CERTIFICATES_DIR="$DOCKER_DEVBOX_DIR/.docker/.ca-certificates"
   CA_CERTIFICATES_MANUAL_DIR="$CA_CERTIFICATES_DIR.manual"
 
-  rm -Rf "/${CA_CERTIFICATES_DIR:?}"
+  if [[ -f "/${CA_CERTIFICATES_DIR:?}/.gitignore" ]]; then
+    find "/${CA_CERTIFICATES_DIR:?}" -type f -not -name '.gitignore' -delete
+  else
+    rm -Rf "/${CA_CERTIFICATES_DIR:?}"
+  fi
 
   if [[ -d "$CA_CERTIFICATES_MANUAL_DIR" ]]; then
     for CERT in "$CA_CERTIFICATES_MANUAL_DIR"/*; do
