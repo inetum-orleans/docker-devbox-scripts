@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# This should avoid issues where docker creates local volume mount points as root:root
+# We can create those folder before starting the stack with the user account.
+for VOLUME_FOLDER in $(dc config | yq r - --tojson | jq -r '[.services[].volumes | values] | add | unique | .[] | match("(\\.?/.*?):.*?:[rw]*?").captures[].string'); do
+  if [[ ! -e "$VOLUME_FOLDER" ]]; then
+    echo "$(tput setaf 2)Creating volume directory: "$(_utils_relative_path $VOLUME_FOLDER)"$(tput sgr0)"
+    mkdir -p "$VOLUME_FOLDER"
+  fi
+done

@@ -13,7 +13,7 @@ if [[ -n "${DOCKER_DEVBOX_SSL}" && "${DOCKER_DEVBOX_SSL}" == "cfssl-cli" ]]; the
       CONFIG_OPTION="--config ""$CONFIG"
     fi
 
-    for RAWDOMAIN in $(dc config | sed -n -e 's/\s*VIRTUAL_HOST: //p'); do
+    for RAWDOMAIN in $(dc config | yq r - --tojson | jq -r '[.services[].environment.VIRTUAL_HOST | values] | unique | .[]'); do
       SHOULD_COPY_CFSSL_CA_CERTIFICATE=0
       while read -sr DOMAIN; do
         DESTINATION_CRT="$DESTINATION/${DOMAIN}.crt"
