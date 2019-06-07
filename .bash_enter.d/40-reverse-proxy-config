@@ -5,12 +5,12 @@ SHOULD_RESTART_NGINX_PROXY="${SHOULD_RESTART_NGINX_PROXY:-0}"
 PROJECT_NGINX_PROXY_PATH="$DOCKER_DEVBOX_DIR/.nginx-proxy"
 PROJECT_TRAEFIK_PATH="$DOCKER_DEVBOX_DIR/.traefik"
 
-if [ -e "${PROJECT_TRAEFIK_PATH}" ]; then
+if [[ -e "${PROJECT_TRAEFIK_PATH}" ]]; then
   rm -f "$PROJECT_TRAEFIK_PATH/"*.ssl.toml
 fi
 
-for DOMAIN in $(dc config | sed -n -e 's/\s*VIRTUAL_HOST: //p'); do
-  if [ -e "${DOCKER_DEVBOX_TRAEFIK_PATH}" ]; then
+while read -sr DOMAIN; do
+  if [[ -e "${DOCKER_DEVBOX_TRAEFIK_PATH}" ]]; then
     mkdir -p "$PROJECT_TRAEFIK_PATH"
 
     if [[ "${DOCKER_DEVBOX_SSL}" != "mkcert" && "${DOCKER_DEVBOX_SSL}" != "cfssl-cli" ]]; then
@@ -31,7 +31,7 @@ EOF
     done
   fi
 
-  if [ -e "${DOCKER_DEVBOX_NGINX_PROXY_PATH}" ]; then
+  if [[ -e "${DOCKER_DEVBOX_NGINX_PROXY_PATH}" ]]; then
     for VHOST_CONF in "$PROJECT_NGINX_PROXY_PATH"/*; do
       VHOST_CONF_DEST_BASENAME=$(basename "$(echo "$VHOST_CONF" | sed -e 's/\[domain\]/'"${DOCKER_DEVBOX_DOMAIN_PREFIX}.${DOCKER_DEVBOX_DOMAIN}"'/g')")
 
@@ -48,10 +48,10 @@ EOF
       fi
     done
   fi
-done
+done < <(_docker_compose_find_virtualhosts)
 
-if [ "$SHOULD_RESTART_NGINX_PROXY" -eq "1" ]; then
-  if [ "$( (docker ps -a | grep nginx-proxy && docker inspect -f "{{.State.Running}}" nginx-proxy) | tail -1)" == "true" ]; then
+if [[ "$SHOULD_RESTART_NGINX_PROXY" -eq "1" ]]; then
+  if [[ "$( (docker ps -a | grep nginx-proxy && docker inspect -f "{{.State.Running}}" nginx-proxy) | tail -1)" == "true" ]]; then
     echo "$(tput setaf 3)Restarting nginx-proxy container ...$(tput sgr0)"
     docker restart nginx-proxy
     echo "$(tput setaf 2)nginx-proxy container has been restarted.$(tput sgr0)"

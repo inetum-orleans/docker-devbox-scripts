@@ -1,32 +1,29 @@
 #!/usr/bin/env bash
 
-#SHOULD_COPY_MKCERT_CA_CERTIFICATE=0
 if [[ -n "${DOCKER_DEVBOX_SSL}" && "${DOCKER_DEVBOX_SSL}" == "mkcert" ]]; then
   MKCERT_EXE=$(command -v mkcert)
   DESTINATION="$DOCKER_DEVBOX_DIR/.certs"
 
   if [[ -x "$MKCERT_EXE" ]]; then
-    for RAWDOMAIN in $(dc config | sed -n -e 's/\s*VIRTUAL_HOST: //p'); do
-      while read -r DOMAIN; do
-        DESTINATION_CRT="$DESTINATION/${DOMAIN}.crt"
-        DESTINATION_KEY="$DESTINATION/${DOMAIN}.key"
+    while read -sr DOMAIN; do
+      DESTINATION_CRT="$DESTINATION/${DOMAIN}.crt"
+      DESTINATION_KEY="$DESTINATION/${DOMAIN}.key"
 
-        if [[ ! -f "$DESTINATION_CRT" ]] || [[ ! -f "$DESTINATION_KEY" ]]; then
-          mkdir -p "$DESTINATION"
-          echo "$(tput setaf 3)Generating project certificate (${DOMAIN})$(tput sgr0)"
+      if [[ ! -f "$DESTINATION_CRT" ]] || [[ ! -f "$DESTINATION_KEY" ]]; then
+        mkdir -p "$DESTINATION"
+        echo "$(tput setaf 3)Generating project certificate (${DOMAIN})$(tput sgr0)"
 
-          if mkcert -cert-file "$DESTINATION_CRT" -key-file "$DESTINATION_KEY" "${DOMAIN}"; then
-            echo "$(tput setaf 2)Project certificate has been generated (${DOMAIN})$(tput sgr0)"
-            SHOULD_COPY_MKCERT_CA_CERTIFICATE=1
-          else
-            echo "$(tput setaf 1)Project certificate generation has failed (${DOMAIN})$(tput sgr0)"
-          fi
-        else
-          echo "$(tput setaf 2)Project certificate exists (${DOMAIN})$(tput sgr0)"
+        if mkcert -cert-file "$DESTINATION_CRT" -key-file "$DESTINATION_KEY" "${DOMAIN}"; then
+          echo "$(tput setaf 2)Project certificate has been generated (${DOMAIN})$(tput sgr0)"
           SHOULD_COPY_MKCERT_CA_CERTIFICATE=1
+        else
+          echo "$(tput setaf 1)Project certificate generation has failed (${DOMAIN})$(tput sgr0)"
         fi
-      done < <(echo "$RAWDOMAIN" | tr ',' '\n')
-    done
+      else
+        echo "$(tput setaf 2)Project certificate exists (${DOMAIN})$(tput sgr0)"
+        SHOULD_COPY_MKCERT_CA_CERTIFICATE=1
+      fi
+    done < <(_docker_compose_find_virtualhosts)
   else
     echo "$(tput setaf 1)Project certificate generation has been skipped because mkcert is not available.$(tput sgr0)"
   fi

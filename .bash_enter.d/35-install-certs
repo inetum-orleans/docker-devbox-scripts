@@ -4,7 +4,7 @@ SHOULD_RESTART_NGINX_PROXY=0
 
 PROJECT_CERTS="$DOCKER_DEVBOX_DIR/.certs"
 
-for DOMAIN in $(dc config | sed -n -e 's/\s*VIRTUAL_HOST: //p'); do
+while read -sr DOMAIN; do
   mkdir -p "${DOCKER_DEVBOX_CERTS_PATH}"
 
   CERT_KEY="${PROJECT_CERTS}/${DOMAIN}.key"
@@ -27,4 +27,4 @@ for DOMAIN in $(dc config | sed -n -e 's/\s*VIRTUAL_HOST: //p'); do
   else
     echo "$(tput setaf 7)$(_utils_relative_path "$CERT_CRT") -> "$CERT_CRT_DEST" (unchanged)$(tput sgr0)"
   fi
-done
+done < <(_docker_compose_find_virtualhosts)

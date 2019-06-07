@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
+
 if [[ "$SHOULD_COPY_CFSSL_CA_CERTIFICATE" == "1" ]]; then
   CA_CERTIFICATES_DIR="$DOCKER_DEVBOX_DIR/.docker/.ca-certificates"
 
-  CFSSL_CLI_EXE=$(command -v cfssl-cli)
+  cacert=$(cfssl-cli info)
 
-  if [[ -x "$CFSSL_CLI_EXE" ]]; then
-    cacert=$(cfssl-cli info)
-
-    if [[ ! -z cacert ]]; then
-      echo "$cacert" > "${CA_CERTIFICATES_DIR}/cfssl-ca.pem"
-      echo "$(tput setaf 2)CFSSL CA Certificate is available in build context (cfssl-ca.pem)$(tput sgr0)"
-    else
-      echo "$(tput setaf 1)Can't get CA certificate for CFSSL certificates.$(tput sgr0)"
-    fi
+  if [[ ! -z cacert ]]; then
+    mkdir -p "${CA_CERTIFICATES_DIR}"
+    echo "$cacert" > "${CA_CERTIFICATES_DIR}/cfssl-ca.pem"
+    echo "$(tput setaf 2)CFSSL CA Certificate is available in build context (cfssl-ca.pem)$(tput sgr0)"
+  else
+    echo "$(tput setaf 1)Can't get CA certificate for CFSSL certificates.$(tput sgr0)"
   fi
 fi
