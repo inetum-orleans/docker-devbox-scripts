@@ -2,9 +2,66 @@
 
 # This should avoid issues where docker creates local volume mount points as root:root
 # We can create those folder before starting the stack with the user account.
-for VOLUME_FOLDER in $(dc config | yq r - --tojson | jq -r '[.services[].volumes | values] | add | unique | .[] | match("(\\.?/.*?):.*?:[rw]*?").captures[].string'); do
-  if [[ ! -e "$VOLUME_FOLDER" ]]; then
-    echo "$(tput setaf 2)Creating volume directory: "$(_utils_relative_path $VOLUME_FOLDER)"$(tput sgr0)"
-    mkdir -p "$VOLUME_FOLDER"
+
+VOLUME_MAPPINGS=$(dc config | yq r - --tojson | jq -r '[.services[].volumes | values] | add | unique | .[] | match("(^\\.?/.*?):(.*?):([rw]*$)") | .captures[0].string + ":" + .captures[1].string')
+for VOLUME_MAPPING in ${VOLUME_MAPPINGS}; do
+  SOURCE=$(echo ${VOLUME_MAPPING} | cut -f1 -d:)
+  DESTINATION=$(echo ${VOLUME_MAPPING} | cut -f2 -d:)
+
+  if [[ -f "$SOURCE" ]]; then
+    continue
   fi
+
+  RELATIVE_SOURCE=$(_utils_relative_path "$SOURCE")
+  if [[ ! -z "$RELATIVE_SOURCE" ]]; then
+    if [[ ! -e "$SOURCE" ]]; then
+      echo "$(tput setaf 2)Local volume directory: "$(_utils_relative_path "$SOURCE")" (create)$(tput sgr0)"
+      mkdir -p "$SOURCE"
+    else
+      echo "$(tput setaf 7)Local volume directory: "$(_utils_relative_path "$SOURCE")" (exists)$(tput sgr0)"
+    fi
+    if [[ $(stat -c "%u:%g" "$SOURCE") != "$USER_ID:$GROUP_ID" ]]; then
+      echo "$(tput setaf 1)Invalid owner detected for directory "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
+      echo "$(tput setaf 3)Run this command to fix: sudo chown -R "$USER_ID:$GROUP_ID" "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
+    fi
+  fi
+done
+
+for VOLUME_MAPPING_A in ${VOLUME_MAPPINGS}; do
+  SOURCE_A=$(echo ${VOLUME_MAPPING_A} | cut -f1 -d:)
+  DESTINATION_A=$(echo ${VOLUME_MAPPING_A} | cut -f2 -d:)
+
+  if [[ -f "$SOURCE_A" ]]; then
+    continue
+  fi
+
+  for VOLUME_MAPPING_B in ${VOLUME_MAPPINGS}; do
+    if [[ "$VOLUME_MAPPING_A" == "$VOLUME_MAPPING_B" ]]; then
+      continue
+    fi
+    SOURCE_B=$(echo "${VOLUME_MAPPING_B}" | cut -f1 -d:)
+    DESTINATION_B=$(echo "${VOLUME_MAPPING_B}" | cut -f2 -d:)
+
+    if [[ -f "$SOURCE_B" ]]; then
+      continue
+    fi
+
+    if [[ "$DESTINATION_B" == "$DESTINATION_A"* ]]; then
+      RELATIVE_B_FROM_A=$(echo "$DESTINATION_B" | sed -rE 's!^'"$DESTINATION_A"/?'!!')
+
+      RELATIVE_SOURCE_A=$(_utils_relative_path "$SOURCE_A")
+      if [[ ! -z "$RELATIVE_SOURCE_A" ]]; then
+        if [[ ! -e "$SOURCE_A/$RELATIVE_B_FROM_A" ]]; then
+          echo "$(tput setaf 2)Local volume directory: "${RELATIVE_SOURCE_A}/${RELATIVE_B_FROM_A}" (descendant of "${RELATIVE_SOURCE_A}") (create)$(tput sgr0)"
+          mkdir -p "$SOURCE_A/$RELATIVE_B_FROM_A"
+        else
+          echo "$(tput setaf 7)Local volume directory: "${RELATIVE_SOURCE_A}/${RELATIVE_B_FROM_A}" (descendant of "${RELATIVE_SOURCE_A}") (exists)$(tput sgr0)"
+        fi
+        if [[ $(stat -c "%u:%g" "$SOURCE_A/$RELATIVE_B_FROM_A") != "$USER_ID:$GROUP_ID" ]]; then
+          echo "$(tput setaf 1)Invalid owner detected for directory "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
+          echo "$(tput setaf 3)Run this command to fix: sudo chown -R "$USER_ID:$GROUP_ID" "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
+        fi
+      fi
+    fi
+  done
 done
