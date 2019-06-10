@@ -20,7 +20,7 @@ for VOLUME_MAPPING in ${VOLUME_MAPPINGS}; do
     else
       echo "$(tput setaf 7)Local volume directory: "$(_utils_relative_path "$SOURCE")" (exists)$(tput sgr0)"
     fi
-    if [[ $(stat -c "%u:%g" "$SOURCE") != "$USER_ID:$GROUP_ID" ]]; then
+    if [[ -d "$SOURCE" && $(stat -c "%u:%g" "$SOURCE") != "$USER_ID:$GROUP_ID" ]]; then
       echo "$(tput setaf 1)Invalid owner detected for directory "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
       echo "$(tput setaf 3)Run this command to fix: sudo chown -R "$USER_ID:$GROUP_ID" "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
     fi
@@ -57,7 +57,7 @@ for VOLUME_MAPPING_A in ${VOLUME_MAPPINGS}; do
         else
           echo "$(tput setaf 7)Local volume directory: "${RELATIVE_SOURCE_A}/${RELATIVE_B_FROM_A}" (descendant of "${RELATIVE_SOURCE_A}") (exists)$(tput sgr0)"
         fi
-        if [[ $(stat -c "%u:%g" "$SOURCE_A/$RELATIVE_B_FROM_A") != "$USER_ID:$GROUP_ID" ]]; then
+        if [[ -d "$SOURCE_A/$RELATIVE_B_FROM_A" && $(stat -c "%u:%g" "$SOURCE_A/$RELATIVE_B_FROM_A") != "$USER_ID:$GROUP_ID" ]]; then
           echo "$(tput setaf 1)Invalid owner detected for directory "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
           echo "$(tput setaf 3)Run this command to fix: sudo chown -R "$USER_ID:$GROUP_ID" "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
         fi
