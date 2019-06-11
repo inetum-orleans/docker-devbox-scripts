@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
-if [ "$1" = "--default-entrypoint" ]; then
+_RUN_REVERSE_PROXY_ENABLE_ARGS=
+if [[ -z "${_RUN_REVERSE_PROXY_ENABLE}" ]]; then
+  _RUN_REVERSE_PROXY_ENABLE_ARGS=" --label traefik.enable=false"
+fi
+
+_RUN_DEFAULT_ENTRYPOINT_ARGS=
+if [[ ! -z "${_RUN_DEFAULT_ENTRYPOINT}" ]]; then
   shift
   IMAGE=$(_docker_find_service_image "$1")
   $(_docker_find_image_entrypoint "$IMAGE" ENTRYPOINT)
-  dc run --rm --label traefik.enable=false --entrypoint "$ENTRYPOINT" "$@"
-else
-  dc run --rm --label traefik.enable=false "$@"
+  _RUN_DEFAULT_ENTRYPOINT_ARGS=" --entrypoint "$ENTRYPOINT""
 fi
+dc run --rm $_RUN_REVERSE_PROXY_ENABLE_ARGS $_RUN_DEFAULT_ENTRYPOINT_ARGS "$@"
