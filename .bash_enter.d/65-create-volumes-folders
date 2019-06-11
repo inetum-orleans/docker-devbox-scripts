@@ -47,7 +47,7 @@ for VOLUME_MAPPING_A in ${VOLUME_MAPPINGS}; do
     fi
 
     if [[ "$DESTINATION_B" == "$DESTINATION_A"* ]]; then
-      RELATIVE_B_FROM_A=$(echo "$DESTINATION_B" | sed -rE 's!^'"$DESTINATION_A"/?'!!')
+      RELATIVE_B_FROM_A=$(echo "$DESTINATION_B" | sed -E 's!^'"$DESTINATION_A"/'!!')
 
       RELATIVE_SOURCE_A=$(_utils_relative_path "$SOURCE_A")
       if [[ ! -z "$RELATIVE_SOURCE_A" ]]; then
