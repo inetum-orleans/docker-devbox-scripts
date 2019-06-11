@@ -108,7 +108,8 @@ _docker_find_image_cmd() {
 
 _docker_compose_find_virtualhosts() {
   local __ret=$1
-  local ret=$(dc config | yq r - --tojson | jq -r '[([.services[].environment.VIRTUAL_HOST | values] | unique | .[]), ([.services[].labels["traefik.frontend.rule"] | values] | unique | .[] | match("Host:(.*)").captures[0].string)] | unique | .[]')
+  # https://jqplay.org/s/4wwVtzMiyx
+  local ret=$(dc config | yq r - --tojson | jq -r '[([.services[].environment.VIRTUAL_HOST | values | scan("(.*?)(?:,|$)")] | unique | .[]), ([.services[].labels["traefik.frontend.rule"] | values] | unique | .[] | [ scan("Host:(.*?)(?:;|$)") ] )] | flatten | map(split(",")) | flatten | unique | .[]')
 
   if [[ "$__ret" ]]; then
     eval $__ret="'$ret'"
