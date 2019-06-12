@@ -10,6 +10,7 @@ if [[ -e "${PROJECT_TRAEFIK_PATH}" ]]; then
 fi
 
 while read -sr DOMAIN; do
+  if [[ -z "$DOMAIN" ]]; then continue; fi;
   if [[ -e "${DOCKER_DEVBOX_TRAEFIK_PATH}" ]]; then
     mkdir -p "$PROJECT_TRAEFIK_PATH"
 
