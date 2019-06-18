@@ -3,7 +3,7 @@
 # This should avoid issues where docker creates local volume mount points as root:root
 # We can create those folder before starting the stack with the user account.
 
-VOLUME_MAPPINGS=$(dc config | yq r - --tojson | jq -r '[.services[].volumes | values] | add | unique | .[] | match("(^\\.?/.*?):(.*?):([rw]*$)") | .captures[0].string + ":" + .captures[1].string')
+VOLUME_MAPPINGS=$(dc config | yq r - --tojson | jq -r '[.services[].volumes | values] | add? | unique | .[] | match("(^\\.?/.*?):(.*?):([rw]*$)") | .captures[0].string + ":" + .captures[1].string')
 for VOLUME_MAPPING in ${VOLUME_MAPPINGS}; do
   SOURCE=$(echo ${VOLUME_MAPPING} | cut -f1 -d:)
   DESTINATION=$(echo ${VOLUME_MAPPING} | cut -f2 -d:)
