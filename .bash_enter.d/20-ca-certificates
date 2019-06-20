@@ -32,7 +32,7 @@ if [[ -z "$DOCKER_DEVBOX_DISABLE_COPY_CA_CERTIFICATES" ]]; then
     done
   fi
 
-  if [[ -d $CA_CERTIFICATES_DIR ]]; then
+  if [[ -d "$CA_CERTIFICATES_DIR" ]]; then
     if [[ -n "$(ls -A "$CA_CERTIFICATES_DIR")" ]]; then
       for cert in "$CA_CERTIFICATES_DIR"/*; do
         echo "$(tput setaf 2)CA Certificate is available in build context ($(basename "$cert"))$(tput sgr0)"

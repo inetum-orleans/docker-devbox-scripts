@@ -6,3 +6,9 @@ for cert in "${CA_CERTIFICATES_DIR}"/*.pem; do
     mv "$cert" "${CA_CERTIFICATES_DIR}/$(basename "$cert" .pem).crt"
   fi
 done
+
+if [[ -d "$CA_CERTIFICATES_DIR" ]]; then
+  for image_directory in $(ls -d "$DOCKER_DEVBOX_DIR/.docker/"*/); do
+    cp -fR "$CA_CERTIFICATES_DIR" "$image_directory"
+  done
+fi
