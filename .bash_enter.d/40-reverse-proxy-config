@@ -27,6 +27,7 @@ while read -sr DOMAIN; do
 EOF
     fi
     for TRAEFIK_FILE in "$PROJECT_TRAEFIK_PATH"/*; do
+      mkdir -p "$DOCKER_DEVBOX_TRAEFIK_PATH/config"
       TRAEFIK_FILE_DEST_BASENAME=$(basename "$(echo "$TRAEFIK_FILE" | sed -e 's/\[domain\]/'"${DOCKER_DEVBOX_DOMAIN_PREFIX}.${DOCKER_DEVBOX_DOMAIN}"'/g')")
       _cp_file_if_different "$TRAEFIK_FILE" "$DOCKER_DEVBOX_TRAEFIK_PATH/config/$TRAEFIK_FILE_DEST_BASENAME"
     done
