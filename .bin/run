@@ -10,7 +10,7 @@ if [[ ! -z "${_RUN_DEFAULT_ENTRYPOINT}" ]]; then
   _docker_find_service_image "$1" IMAGE
   _docker_find_image_entrypoint "$IMAGE" ENTRYPOINT
   ENTRYPOINT=$(echo "$ENTRYPOINT" | jq -r 'if type=="string" then . else join(" ") end')
-  dc run --rm --no-deps $_RUN_REVERSE_PROXY_ENABLE_ARGS --entrypoint "$ENTRYPOINT" "$@"
+  dc run $_RUN_OPTS --rm --no-deps $_RUN_REVERSE_PROXY_ENABLE_ARGS --entrypoint "$ENTRYPOINT" "$@"
 else
-  dc run --rm --no-deps $_RUN_REVERSE_PROXY_ENABLE_ARGS "$@"
+  dc run $_RUN_OPTS --rm --no-deps $_RUN_REVERSE_PROXY_ENABLE_ARGS "$@"
 fi

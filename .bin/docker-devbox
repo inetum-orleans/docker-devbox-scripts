@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+COMMAND="$1"
+ARG="$2"
+
+if [[ "$COMMAND" == "bin" ]]; then
+  DOCKER_DEVBOX_GLOBAL_BIN=${DOCKER_DEVBOX_GLOBAL_BIN:-$HOME/bin}
+
+  if [[ "$ARG" == "global" ]]; then
+    mkdir -p "$DOCKER_DEVBOX_GLOBAL_BIN/.docker-devbox/$COMPOSE_PROJECT_NAME"
+
+    for BIN in "$DOCKER_DEVBOX_DIR"/.bin/*; do
+      BIN_BASENAME=$(basename "$BIN")
+      if [[ "$BIN_BASENAME" == "yo" ]]; then
+        continue
+      fi
+
+      f="$DOCKER_DEVBOX_GLOBAL_BIN/.docker-devbox/$COMPOSE_PROJECT_NAME/$BIN_BASENAME"
+
+      echo "DOCKER_DEVBOX_SCRIPTS_PATH=$DOCKER_DEVBOX_SCRIPTS_PATH \\" >$f
+      echo "PATH=\$PATH:\$DOCKER_DEVBOX_SCRIPTS_PATH/.bin \\" >>$f
+      echo "_DC_OPTS=\"-f \"$DOCKER_DEVBOX_DIR\"/.docker-compose.resolved.yml\" \"$DOCKER_DEVBOX_DIR\"/.docker-compose.override.resolved.yml\" \\" >>$f
+      echo "_RUN_OPTS=\"-v \$PWD:/pwd\" \\" >>$f
+      echo "_DOCKER_WORKDIR=\"/pwd\" \\" >>$f
+      echo "\"$DOCKER_DEVBOX_DIR\"/.bin"/\"$BIN_BASENAME\" "\"\$@\"" >>$f
+      chmod +x $f
+      ln -fs "$f" "$DOCKER_DEVBOX_GLOBAL_BIN"
+      echo "$(tput setaf 2)\"$BIN_BASENAME\" command is now available in global scope$(tput sgr0)"
+
+    done
+  elif [[ "$ARG" == "local" ]]; then
+    rm -Rf "$DOCKER_DEVBOX_GLOBAL_BIN/.docker-devbox/$COMPOSE_PROJECT_NAME"
+    find -L "$DOCKER_DEVBOX_GLOBAL_BIN" -maxdepth 1 -type l -delete
+    echo "$(tput setaf 2)$COMPOSE_PROJECT_NAME commands have been removed from global scope$(tput sgr0)"
+  else
+    echo "$(tput setaf 1)Unknown subcommand: $ARG$(tput sgr0)"
+    echo "$(tput setaf 3)Available subcommands: global, local$(tput sgr0)"
+    exit 1
+  fi
+else
+  echo "$(tput setaf 1)Unknown command: $COMMAND$(tput sgr0)"
+  echo "$(tput setaf 3)Available commands: bin$(tput sgr0)"
+  exit 1
+fi

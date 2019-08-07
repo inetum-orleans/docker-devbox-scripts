@@ -5,9 +5,13 @@ _docker_workdir() {
   local CONTAINER_PROJECT_DIR="$1"
   local __ret=$2
 
-  local RELATIVE_PATH=$(_utils_relative_path "$PWD")
-  local CONTAINER_PWD="$CONTAINER_PROJECT_DIR/$RELATIVE_PATH"
-  local ret="$CONTAINER_PWD"
+  if [[ -z "$_DOCKER_WORKDIR" ]]; then
+    local RELATIVE_PATH=$(_utils_relative_path "$PWD")
+    local CONTAINER_PWD="$CONTAINER_PROJECT_DIR/$RELATIVE_PATH"
+    local ret="$CONTAINER_PWD"
+  else
+    local ret="$_DOCKER_WORKDIR"
+  fi
 
   if [[ "$__ret" ]]; then
     eval $__ret="'$ret'"
