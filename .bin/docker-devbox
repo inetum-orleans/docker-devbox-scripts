@@ -19,7 +19,7 @@ if [[ "$COMMAND" == "bin" ]]; then
 
       echo "DOCKER_DEVBOX_SCRIPTS_PATH=$DOCKER_DEVBOX_SCRIPTS_PATH \\" >$f
       echo "PATH=\$PATH:\$DOCKER_DEVBOX_SCRIPTS_PATH/.bin \\" >>$f
-      echo "_DC_OPTS=\"-f \"$DOCKER_DEVBOX_DIR\"/.docker-compose.resolved.yml\" \"$DOCKER_DEVBOX_DIR\"/.docker-compose.override.resolved.yml\" \\" >>$f
+      echo "_DC_OPTS=\"-f \"$DOCKER_DEVBOX_DIR/.docker-compose.resolved.yml\" -f \"$DOCKER_DEVBOX_DIR/.docker-compose.override.resolved.yml\"\" \\" >>$f
       echo "_RUN_OPTS=\"-v \$PWD:/pwd\" \\" >>$f
       echo "_DOCKER_WORKDIR=\"/pwd\" \\" >>$f
       echo "\"$DOCKER_DEVBOX_DIR\"/.bin"/\"$BIN_BASENAME\" "\"\$@\"" >>$f
