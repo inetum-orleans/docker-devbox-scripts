@@ -6,6 +6,6 @@ if [[ ! -e "$DOCKER_DEVBOX_DIR/.docker/fixuid.tar.gz" ]]; then
    curl -fsSL -o "$DOCKER_DEVBOX_DIR/.docker/fixuid.tar.gz" "https://github.com/boxboat/fixuid/releases/download/v0.4/fixuid-0.4-linux-amd64.tar.gz"
 fi
 
-for image_directory in $(ls -d "$DOCKER_DEVBOX_DIR/.docker/"*/); do
+for image_directory in $(ls -d "$DOCKER_DEVBOX_DIR/.docker/"*/ 2>/dev/null); do
   cp -f "$DOCKER_DEVBOX_DIR/.docker/fixuid.tar.gz" "$image_directory"
 done
