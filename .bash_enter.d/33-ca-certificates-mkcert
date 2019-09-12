@@ -3,9 +3,21 @@ if [[ "$SHOULD_COPY_MKCERT_CA_CERTIFICATE" == "1" ]]; then
   CA_CERTIFICATES_DIR="$DOCKER_DEVBOX_DIR/.docker/.ca-certificates"
   MKCERT_EXE=$(command -v mkcert)
 
+  if [[ $EUID -eq 0 ]]; then
+    SUDO_EXE=""
+  else
+    SUDO_EXE=$(command -v sudo)
+    if [[ ! -x "$SUDO_EXE" ]]; then
+      echo "sudo is not available." 2>&1 | tee -a "$_LOG"
+      SUDO_EXE=""
+    else
+      SUDO_EXE="$SUDO_EXE -E"
+    fi
+  fi
+
   if [[ -x "$MKCERT_EXE" ]]; then
     if [[ ! -f "$(mkcert -CAROOT)/rootCA.pem" ]]; then
-      mkcert -install
+      $SUDO_EXE $MKCERT_EXE -install
     fi
 
     mkdir -p "/${CA_CERTIFICATES_DIR:?}"
