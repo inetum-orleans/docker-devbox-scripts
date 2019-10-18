@@ -14,8 +14,13 @@ else
   EXTENSION=".$EXTENSION"
 fi
 
+if [[ -z "$FILENAME" ]]; then
+  FILENAME="$EXTENSION"
+  EXTENSION=""
+fi
+
 ACTIVE_ENV=0
-MESSAGE="$(tput setaf 1)$(_utils_relative_path "$DIRNAME/$FILENAME.$DOCKER_DEVBOX_ENV$EXTENSION") -> $FILENAME$EXTENSION. (Symlink has not been created)$(tput sgr0)"
+MESSAGE="$(tput setaf 1)$(_utils_relative_path "$DIRNAME/$FILENAME.$DOCKER_DEVBOX_ENV$EXTENSION") -> $FILENAME$EXTENSION (Symlink has not been created)$(tput sgr0)"
 
 for ENV in $DOCKER_DEVBOX_ENV_LIST; do
   if [ "$ENV" = "$DOCKER_DEVBOX_ENV" ]; then
