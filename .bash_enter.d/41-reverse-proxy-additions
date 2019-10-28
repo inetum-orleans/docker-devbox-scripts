@@ -22,6 +22,8 @@ elif [[ -n $DOCKER_DEVBOX_REVERSE_PROXY_SERVICES ]]; then
 
     echo "$(tput setaf 2)$REVERSE_PROXY_TYPE is running$(tput sgr0)"
 
+    DC_CONFIG=$(dc config)
+
     SERVICE_SPECS=("$DOCKER_DEVBOX_REVERSE_PROXY_SERVICES")
     head -n 1 "$DOCKER_DEVBOX_DIR/docker-compose.yml"> "$GENERATED_FILEPATH"
     cat << EOF >> "$GENERATED_FILEPATH" | mo
@@ -40,36 +42,40 @@ EOF
         SERVICE_DOMAIN_PREFIX="$SERVICE_DOMAIN_PREFIX."
       fi
 
-      cat << EOF >> "$GENERATED_FILEPATH" | mo
+      if ! echo "$DC_CONFIG" | grep -qE "^  $SERVICE_NAME:$"; then
+        echo "$(tput setaf 3)$SERVICE_NAME is not available$(tput sgr0)"
+      else
+        cat << EOF >> "$GENERATED_FILEPATH" | mo
   $SERVICE_NAME:
     networks:
       - default
       - reverse-proxy
 EOF
-  
-      if [[ "$REVERSE_PROXY_TYPE" == "traefik (v1)" ]]; then
-        cat << EOF >> "$GENERATED_FILEPATH" | mo
+    
+        if [[ "$REVERSE_PROXY_TYPE" == "traefik (v1)" ]]; then
+          cat << EOF >> "$GENERATED_FILEPATH" | mo
     labels:
       - 'traefik.enable=true'
       - 'traefik.frontend.rule=Host:$SERVICE_DOMAIN_PREFIX\${DOCKER_DEVBOX_DOMAIN_PREFIX}.\${DOCKER_DEVBOX_DOMAIN}'
       - 'traefik.port=$SERVICE_PORT'
 EOF
-      elif [[ "$REVERSE_PROXY_TYPE" == "traefik (v2+)" ]]; then
-        cat << EOF >> "$GENERATED_FILEPATH" | mo
+        elif [[ "$REVERSE_PROXY_TYPE" == "traefik (v2+)" ]]; then
+          cat << EOF >> "$GENERATED_FILEPATH" | mo
     labels: # TODO: This should be changed for Traefik v2
       - 'traefik.enable=true'
       - 'traefik.frontend.rule=Host:$SERVICE_DOMAIN_PREFIX\${DOCKER_DEVBOX_DOMAIN_PREFIX}.\${DOCKER_DEVBOX_DOMAIN}'
       - 'traefik.port=$SERVICE_PORT'
 EOF
-      elif [[ "$REVERSE_PROXY_TYPE" == "nginx-proxy" ]]; then
-        cat << EOF >> "$GENERATED_FILEPATH" | mo
+        elif [[ "$REVERSE_PROXY_TYPE" == "nginx-proxy" ]]; then
+          cat << EOF >> "$GENERATED_FILEPATH" | mo
     environment:
       - 'VIRTUAL_HOST=$SERVICE_DOMAIN_PREFIX\${DOCKER_DEVBOX_DOMAIN_PREFIX}.\${DOCKER_DEVBOX_DOMAIN}'
       - 'VIRTUAL_PORT=$SERVICE_PORT'
 EOF
-      fi
-
+        fi
       echo "$(tput setaf 2)$SERVICE_NAME is configured on reverse proxy ($SERVICE_DOMAIN_PREFIX${DOCKER_DEVBOX_DOMAIN_PREFIX}.${DOCKER_DEVBOX_DOMAIN})$(tput sgr0)"
+
+      fi
     done
   fi
 fi
