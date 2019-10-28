@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+GENERATED_FILEPATH="$DOCKER_DEVBOX_DIR/.docker-compose.reverse-proxy.generated.yml"
+rm -f "$GENERATED_FILEPATH"
+
+if [[ -n $DOCKER_DEVBOX_DISABLE_REVERSE_PROXY_SERVICES ]]; then
+  echo "$(tput setaf 3)Reverse proxy services generation is disabled.$(tput sgr0)"
+elif [[ -n $DOCKER_DEVBOX_REVERSE_PROXY_SERVICES ]]; then
+  TRAEFIK_VERSION=$(set -o pipefail && curl --max-time 1 -s "http://traefik.${DOCKER_DEVBOX_DOMAIN}/api/version" | jq .Version -r)
+  if [ $? -ne 0 ]; then
+    echo "$(tput setaf 1)Reverse proxy is unavailable!$(tput sgr0)"
+  else
+    REVERSE_PROXY_TYPE=""
+
+    if [[ "${TRAEFIK_VERSION:0:2}" == "v1" ]]; then
+      REVERSE_PROXY_TYPE="traefik (v1)"
+    elif [[ "${TRAEFIK_VERSION:0:2}" == "v2" ]]; then
+      REVERSE_PROXY_TYPE="traefik (v2+)"
+    elif [[ "${TRAEFIK_VERSION}" == "" ]]; then
+      REVERSE_PROXY_TYPE="nginx-proxy"
+    fi
+
+    echo "$(tput setaf 2)$REVERSE_PROXY_TYPE is running$(tput sgr0)"
+
+    SERVICE_SPECS=("$DOCKER_DEVBOX_REVERSE_PROXY_SERVICES")
+    head -n 1 "$DOCKER_DEVBOX_DIR/docker-compose.yml"> "$GENERATED_FILEPATH"
+    cat << EOF >> "$GENERATED_FILEPATH" | mo
+networks:
+  reverse-proxy:
+    name: '\${DOCKER_DEVBOX_REVERSE_PROXY_NETWORK}'
+    external: true
+EOF
+    echo "services:">> "$GENERATED_FILEPATH"
+    for SERVICE_SPEC in $SERVICE_SPECS
+    do
+      SERVICE_NAME=$(echo "$SERVICE_SPEC" | awk -F':' '{print $1}')
+      SERVICE_PORT=$(echo "$SERVICE_SPEC" | awk -F':' '{print $2}')
+      SERVICE_DOMAIN_PREFIX=$(echo "$SERVICE_SPEC" | awk -F':' '{print $3}')
+      if [[ -n "$SERVICE_DOMAIN_PREFIX" ]]; then
+        SERVICE_DOMAIN_PREFIX="$SERVICE_DOMAIN_PREFIX."
+      fi
+
+      cat << EOF >> "$GENERATED_FILEPATH" | mo
+  $SERVICE_NAME:
+    networks:
+      - default
+      - reverse-proxy
+EOF
+  
+      if [[ "$REVERSE_PROXY_TYPE" == "traefik (v1)" ]]; then
+        cat << EOF >> "$GENERATED_FILEPATH" | mo
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.frontend.rule=Host:$SERVICE_DOMAIN_PREFIX\${DOCKER_DEVBOX_DOMAIN_PREFIX}.\${DOCKER_DEVBOX_DOMAIN}'
+      - 'traefik.port=$SERVICE_PORT'
+EOF
+      elif [[ "$REVERSE_PROXY_TYPE" == "traefik (v2+)" ]]; then
+        cat << EOF >> "$GENERATED_FILEPATH" | mo
+    labels: # TODO: This should be changed for Traefik v2
+      - 'traefik.enable=true'
+      - 'traefik.frontend.rule=Host:$SERVICE_DOMAIN_PREFIX\${DOCKER_DEVBOX_DOMAIN_PREFIX}.\${DOCKER_DEVBOX_DOMAIN}'
+      - 'traefik.port=$SERVICE_PORT'
+EOF
+      elif [[ "$REVERSE_PROXY_TYPE" == "nginx-proxy" ]]; then
+        cat << EOF >> "$GENERATED_FILEPATH" | mo
+    environment:
+      - 'VIRTUAL_HOST=$SERVICE_DOMAIN_PREFIX\${DOCKER_DEVBOX_DOMAIN_PREFIX}.\${DOCKER_DEVBOX_DOMAIN}'
+      - 'VIRTUAL_PORT=$SERVICE_PORT'
+EOF
+      fi
+
+      echo "$(tput setaf 2)$SERVICE_NAME is configured on reverse proxy ($SERVICE_DOMAIN_PREFIX${DOCKER_DEVBOX_DOMAIN_PREFIX}.${DOCKER_DEVBOX_DOMAIN})$(tput sgr0)"
+    done
+  fi
+fi

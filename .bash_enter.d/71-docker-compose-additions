@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+. "${DOCKER_DEVBOX_SCRIPTS_PATH:-$DOCKER_DEVBOX_SCRIPTS_PATH_STAGING}/.bash.lib.d/20-utils"
+
+# Automates addition of .docker-compose.*.generated.yml and docker-compose.*.addition.yml to docker compose configuration.
+DC_ADDITION_FILES=$(find "$DOCKER_DEVBOX_DIR" -maxdepth 1 -type f\
+ -name '.docker-compose.*.generated.yml' -o\
+ -name '.docker-compose.generated.yml' -o\
+ -name 'docker-compose.*.addition.yml' -o\
+ -name 'docker-compose.addition.yml')
+
+DEFAULT_DC_FILES=""
+if [[ -f  "$DOCKER_DEVBOX_DIR/docker-compose.yml" ]]; then
+  DEFAULT_DC_FILES="$DEFAULT_DC_FILES $DOCKER_DEVBOX_DIR/docker-compose.yml"
+fi
+
+if [[ -f  "$DOCKER_DEVBOX_DIR/docker-compose.override.yml" ]]; then
+  DEFAULT_DC_FILES="$DEFAULT_DC_FILES $DOCKER_DEVBOX_DIR/docker-compose.override.yml"
+fi
+
+_DC_FILES=""
+for DC_FILE in $DEFAULT_DC_FILES; do
+  # echo "$(tput setaf 7)$(_utils_relative_path "$DC_FILE")$(tput sgr0)"
+  _DC_FILES="${_DC_FILES} -f ${DC_FILE}"
+done
+
+ADDITION_DC_FILES=$(find "$DOCKER_DEVBOX_DIR" \
+ -maxdepth 1\
+ -type f\
+ -name '.docker-compose.*.generated.yml' -o\
+ -name '.docker-compose.generated.yml' -o\
+ -name 'docker-compose.*.addition.yml' -o\
+ -name 'docker-compose.addition.yml')
+
+for DC_FILE in $ADDITION_DC_FILES; do
+  echo "$(tput setaf 2)Additional docker-compose configuration file: $(_utils_relative_path "$DC_FILE")$(tput sgr0)"
+  _DC_FILES="${_DC_FILES} -f ${DC_FILE}"
+done
+
+autostash _DC_FILES
+export _DC_FILES
