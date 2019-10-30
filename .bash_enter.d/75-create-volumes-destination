@@ -15,13 +15,34 @@ for VOLUME_MAPPING in ${VOLUME_MAPPINGS}; do
   RELATIVE_SOURCE=$(_utils_relative_path "$SOURCE")
   if [[ ! -z "$RELATIVE_SOURCE" ]]; then
     if [[ ! -e "$SOURCE" ]]; then
-      echo "$(tput setaf 2)Local volume directory: "$(_utils_relative_path "$SOURCE")" (create)$(tput sgr0)"
-      mkdir -p "$SOURCE"
+
+      FILENAME=$(basename "$SOURCE")
+      EXTENSION="${FILENAME##*.}"
+      FILENAME="${FILENAME%.*}"
+
+      if [[ "$EXTENSION" = "$FILENAME" ]]; then
+        EXTENSION=""
+      else
+        EXTENSION=".$EXTENSION"
+      fi
+
+      if [[ -z "$FILENAME" ]]; then
+        FILENAME="$EXTENSION"
+        EXTENSION=""
+      fi
+
+      if [[ -z "$EXTENSION" ]]; then
+        echo "$(tput setaf 2)Local volume destination: "$(_utils_relative_path "$SOURCE")" (create directory)$(tput sgr0)"
+        mkdir -p "$SOURCE"
+      else
+        echo "$(tput setaf 2)Local volume destination: "$(_utils_relative_path "$SOURCE")" (create file)$(tput sgr0)"
+        touch "$SOURCE"
+      fi
     else
-      echo "$(tput setaf 7)Local volume directory: "$(_utils_relative_path "$SOURCE")" (exists)$(tput sgr0)"
+      echo "$(tput setaf 7)Local volume destination: "$(_utils_relative_path "$SOURCE")" (exists)$(tput sgr0)"
     fi
     if [[ -d "$SOURCE" && $(stat -c "%u:%g" "$SOURCE") != "$USER_ID:$GROUP_ID" ]]; then
-      echo "$(tput setaf 1)Invalid owner detected for directory "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
+      echo "$(tput setaf 1)Invalid owner detected for destination "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
       echo "$(tput setaf 3)Run this command to fix: sudo chown -R "$USER_ID:$GROUP_ID" "$(_utils_relative_path "$SOURCE")"$(tput sgr0)"
     fi
   fi
