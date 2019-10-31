@@ -112,7 +112,7 @@ _docker_find_image_cmd() {
 
 _docker_compose_find_virtualhosts() {
   local __ret=$1
-  local ret=$(dc config | yq r - --tojson | jq -r '([ .services[].environment.VIRTUAL_HOST | values | scan("(.*?)(?:,|$)") ] + [ .services[].labels | values | to_entries | map(select(.key | test("traefik.*.frontend.rule"))) | from_entries | .[] | scan("Host:(.*?)(?:;|$)") | map(split(",")) ]) | flatten | unique | .[]')
+  local ret=$(dc config | yq r - --tojson | jq -r '([ .services[].environment.VIRTUAL_HOST | values | scan("(.*?)(?:,|$)") ] + [ .services[].labels | values | to_entries | map(select(.key | test("traefik.*.frontend.rule"))) | from_entries | .[] | scan("Host:(.*?)(?:;|$)") | map(split(",")) ] + [ .services[].labels | values | to_entries | map(select(.key | test("traefik.http.routers.*.rule"))) | from_entries | .[] | scan("Host\\((.*?)\\)") | map(split(",")) ]) | flatten |  unique | .[] |  gsub("^[\\s|\\`|\\\\\"]+|^\\s+|^\\`|\\s+$|\\s+$|\\`$";"")')
 
   if [[ "$__ret" ]]; then
     eval $__ret="'$ret'"

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+if [[ -z $DOCKER_DEVBOX_REVERSE_PROXY_TYPE ]]; then
+  TRAEFIK_VERSION=$(set -o pipefail && curl --max-time 1 -s "http://traefik.${DOCKER_DEVBOX_DOMAIN}/api/version" | jq .Version -r)
+  if [ $? -ne 0 ]; then
+    echo "$(tput setaf 1)Reverse proxy is unavailable!$(tput sgr0)"
+  else
+    if [[ "${TRAEFIK_VERSION:0:2}" == "v1" ]]; then
+      DOCKER_DEVBOX_REVERSE_PROXY_TYPE="traefik (v1)"
+    elif [[ "${TRAEFIK_VERSION:0:1}" == "2" ]]; then
+      DOCKER_DEVBOX_REVERSE_PROXY_TYPE="traefik (v2)"
+    elif [[ "${TRAEFIK_VERSION}" == "" ]]; then
+      DOCKER_DEVBOX_REVERSE_PROXY_TYPE="nginx-proxy"
+    fi
+
+    echo "$(tput setaf 2)$DOCKER_DEVBOX_REVERSE_PROXY_TYPE is running$(tput sgr0)"
+    autostash DOCKER_DEVBOX_REVERSE_PROXY_TYPE="$DOCKER_DEVBOX_REVERSE_PROXY_TYPE"
+  fi
+else
+  echo "$(tput setaf 2)$DOCKER_DEVBOX_REVERSE_PROXY_TYPE is assumed$(tput sgr0)"
+fi

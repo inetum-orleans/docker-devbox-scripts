@@ -17,10 +17,10 @@ if [[ -f  "$DOCKER_DEVBOX_DIR/docker-compose.override.yml" ]]; then
   DEFAULT_DC_FILES="$DEFAULT_DC_FILES $DOCKER_DEVBOX_DIR/docker-compose.override.yml"
 fi
 
-_DC_FILES=""
+DOCKER_DEVBOX_COMPOSE_FILES_OPTS=""
 for DC_FILE in $DEFAULT_DC_FILES; do
   # echo "$(tput setaf 7)$(_utils_relative_path "$DC_FILE")$(tput sgr0)"
-  _DC_FILES="${_DC_FILES} -f ${DC_FILE}"
+  DOCKER_DEVBOX_COMPOSE_FILES_OPTS="${DOCKER_DEVBOX_COMPOSE_FILES_OPTS} -f ${DC_FILE}"
 done
 
 ADDITION_DC_FILES=$(find "$DOCKER_DEVBOX_DIR" \
@@ -33,8 +33,10 @@ ADDITION_DC_FILES=$(find "$DOCKER_DEVBOX_DIR" \
 
 for DC_FILE in $ADDITION_DC_FILES; do
   echo "$(tput setaf 2)Additional docker-compose configuration file: $(_utils_relative_path "$DC_FILE")$(tput sgr0)"
-  _DC_FILES="${_DC_FILES} -f ${DC_FILE}"
+  DOCKER_DEVBOX_COMPOSE_FILES_OPTS="${DOCKER_DEVBOX_COMPOSE_FILES_OPTS} -f ${DC_FILE}"
 done
 
-autostash _DC_FILES
-export _DC_FILES
+DOCKER_DEVBOX_COMPOSE_FILES_OPTS="${DOCKER_DEVBOX_COMPOSE_FILES_OPTS## }"
+
+autostash -f DOCKER_DEVBOX_COMPOSE_FILES_OPTS
+export DOCKER_DEVBOX_COMPOSE_FILES_OPTS
