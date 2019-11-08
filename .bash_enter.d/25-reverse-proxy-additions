@@ -36,10 +36,12 @@ EOF
       if ! echo "$DC_CONFIG" | grep -qE "^  $SERVICE_NAME:$"; then
         echo "$(tput setaf 3)$SERVICE_NAME is not available$(tput sgr0)"
       else
-        TRAEFIK_ENABLE="      - 'traefik.enable=true'"        
+        TRAEFIK_ENABLE="      - 'traefik.enable=true'"
         if [[ "$SERVICE_NAME" == "$PREVIOUS_SERVICE_NAME" ]]; then
           TRAEFIK_ENABLE=""
+          NGINX_PROXY_VIRTUAL_HOST="$NGINX_PROXY_VIRTUAL_HOST,$SERVICE_DOMAIN_PREFIX\${DOCKER_DEVBOX_DOMAIN_PREFIX}.\${DOCKER_DEVBOX_DOMAIN}"
         else
+          NGINX_PROXY_VIRTUAL_HOST="$SERVICE_DOMAIN_PREFIX\${DOCKER_DEVBOX_DOMAIN_PREFIX}.\${DOCKER_DEVBOX_DOMAIN}"
           GENERATED_FILEPATH_NETWORKS_TMP="$GENERATED_FILEPATH.networks.tmp"
           cat << EOF > "$GENERATED_FILEPATH_NETWORKS_TMP" | mo
 services:
@@ -84,14 +86,18 @@ EOF
 services:
   $SERVICE_NAME:
     environment:
-      - 'VIRTUAL_HOST=$SERVICE_DOMAIN_PREFIX\${DOCKER_DEVBOX_DOMAIN_PREFIX}.\${DOCKER_DEVBOX_DOMAIN}'
+      - 'VIRTUAL_HOST=$NGINX_PROXY_VIRTUAL_HOST'
       - 'VIRTUAL_PORT=$SERVICE_PORT'
 EOF
         fi
 
         if [[ -f "$GENERATED_FILEPATH_TMP" ]]; then
           # Merge with main file
-          yq merge --inplace --append "$GENERATED_FILEPATH" "$GENERATED_FILEPATH_TMP"
+          if [[ "$DOCKER_DEVBOX_REVERSE_PROXY_TYPE" == "nginx-proxy" ]]; then
+            yq merge --inplace "$GENERATED_FILEPATH" "$GENERATED_FILEPATH_TMP"
+          else
+            yq merge --inplace --append "$GENERATED_FILEPATH" "$GENERATED_FILEPATH_TMP"
+          fi
           rm -f "$GENERATED_FILEPATH_TMP"
         fi
 
