@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 if [[ -z $DOCKER_DEVBOX_REVERSE_PROXY_TYPE ]]; then
   autostash DOCKER_DEVBOX_REVERSE_PROXY_TYPE
-  REVERSE_PROXY_RESPONSE=$(set -o pipefail && curl --max-time 1 -s "http://traefik.${DOCKER_DEVBOX_DOMAIN}/api/version")
+  REVERSE_PROXY_RESPONSE=$(set -o pipefail && curl --max-time 1 -s "http://127.0.0.1/api/version")
 
   if [ $? -ne 0 ]; then
     echo "$(tput setaf 1)Reverse proxy is unavailable (connection failed)!$(tput sgr0)"
