@@ -94,7 +94,7 @@ EOF
         if [[ -f "$GENERATED_FILEPATH_TMP" ]]; then
           # Merge with main file
           if [[ "$DOCKER_DEVBOX_REVERSE_PROXY_TYPE" == "nginx-proxy" ]]; then
-            yq merge --inplace "$GENERATED_FILEPATH" "$GENERATED_FILEPATH_TMP"
+            yq merge --inplace --overwrite "$GENERATED_FILEPATH" "$GENERATED_FILEPATH_TMP"
           else
             yq merge --inplace --append "$GENERATED_FILEPATH" "$GENERATED_FILEPATH_TMP"
           fi
