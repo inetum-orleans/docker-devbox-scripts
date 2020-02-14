@@ -1,17 +1,42 @@
 #!/usr/bin/env bash
 
 # This should apply executable flags defined on git repository based on git ls-tree output
-if $([ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1); then
-	for f in $(git ls-tree -r HEAD | grep -E "[0-9]+755 +" | cut -f2); do
-		if [[ ! -x "$f" ]]; then
-			echo "$(tput setaf 2)chmod +x \"$f\"$(tput sgr0)"
-			chmod +x "$f"
+function _git_chmod {
+	if $([ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1); then
+		submodule_path=$(_utils_relative_path "$PWD")
+		if [[ -z $submodule_path ]]; then
+			echo "$(tput setaf 7)Checking executable flags from git repository$(tput sgr0)"
+		else 
+			echo "$(tput setaf 7)Checking executable flags from git repository ($submodule_path)$(tput sgr0)"
 		fi
-	done
-	for f in $(git ls-tree -r HEAD | grep -E "[0-9]+644 +" | cut -f2); do
-		if [[ -x "$f" ]]; then
-			echo "$(tput setaf 2)chmod -x \"$f\"$(tput sgr0)"
-			chmod -x "$f"
+
+		chmod_changed=
+		for f in $(git ls-tree -r HEAD | grep -E "[0-9]+755 +" | cut -f2); do
+			if [[ ! -x "$f" ]]; then
+				echo "$(tput setaf 3)chmod +x \"$f\"$(tput sgr0)"
+				chmod_changed=1
+				chmod +x "$f"
+			fi
+		done
+		for f in $(git ls-tree -r HEAD | grep -E "[0-9]+644 +" | cut -f2); do
+			if [[ -x "$f" ]]; then
+				echo "$(tput setaf 3)chmod -x \"$f\"$(tput sgr0)"
+				chmod_changed=1
+				chmod -x "$f"
+			fi
+		done
+
+		if [[ "$chmod_changed" == "1" ]]; then
+			echo ""
+			echo "$(tput setaf 3)Some chmod commands have been executed from git metadata.$(tput sgr0)"
+			echo "$(tput setaf 3)If it doesn't fit your needs, you should change executable flags inside repository.$(tput sgr0)"
+			echo "$(tput setaf 3)Use the following command: git update-index --chmod=<flags> foo.sh$(tput sgr0)"
+			echo "$(tput setaf 3)chmod +x foo.sh => git update-index --chmod=+x foo.sh$(tput sgr0)"
+			echo "$(tput setaf 3)chmod -x foo.sh => git update-index --chmod=-x foo.sh$(tput sgr0)"
 		fi
-	done
-fi
+	fi
+}
+_git_chmod
+for submodule in $(git config --file .gitmodules --get-regexp path | awk '{ print $2 }'); do
+	(cd "$submodule" && source "${BASH_SOURCE[0]}")
+done
