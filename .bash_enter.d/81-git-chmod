@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# This should apply executable flags defined on git repository based on git ls-tree output
+if $([ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1); then
+	for f in $(git ls-tree -r HEAD | grep -E "[0-9]+755 +" | cut -f2); do
+		if [[ ! -x "$f" ]]; then
+			echo "$(tput setaf 2)chmod +x \"$f\"$(tput sgr0)"
+			chmod +x "$f"
+		fi
+	done
+	for f in $(git ls-tree -r HEAD | grep -E "[0-9]+644 +" | cut -f2); do
+		if [[ -x "$f" ]]; then
+			echo "$(tput setaf 2)chmod -x \"$f\"$(tput sgr0)"
+			chmod -x "$f"
+		fi
+	done
+fi
