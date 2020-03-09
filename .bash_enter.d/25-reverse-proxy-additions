@@ -44,6 +44,11 @@ EOF
           TRAEFIK_ENABLE="$TRAEFIK_ENABLE$NL      - 'traefik.http.routers.${COMPOSE_PROJECT_NAME}${ROUTER_DOMAIN_SUFFIX}-tls.tls.certresolver=letsencrypt'"
         fi
 
+        if [[ -z "$DOCKER_DEVBOX_SSL_NO_REDIRECT" && ! -z "$DOCKER_DEVBOX_SSL" && "$DOCKER_DEVBOX_SSL" != "false" ]]; then
+          TRAEFIK_ENABLE="$TRAEFIK_ENABLE$NL      - 'traefik.http.middlewares.${COMPOSE_PROJECT_NAME}${ROUTER_DOMAIN_SUFFIX}-redirectscheme.redirectscheme.scheme=https'"
+          TRAEFIK_ENABLE="$TRAEFIK_ENABLE$NL      - 'traefik.http.routers.${COMPOSE_PROJECT_NAME}${ROUTER_DOMAIN_SUFFIX}.middlewares=${COMPOSE_PROJECT_NAME}${ROUTER_DOMAIN_SUFFIX}-redirectscheme'"
+        fi
+
         if [[ "$SERVICE_NAME" == "$PREVIOUS_SERVICE_NAME" ]]; then
           TRAEFIK_ENABLE=""
           NGINX_PROXY_VIRTUAL_HOST="$NGINX_PROXY_VIRTUAL_HOST,$SERVICE_DOMAIN_PREFIX\${DOCKER_DEVBOX_DOMAIN_PREFIX}.\${DOCKER_DEVBOX_DOMAIN}"
