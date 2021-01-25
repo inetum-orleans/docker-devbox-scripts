@@ -7,5 +7,5 @@ if [ -e "${DOCKER_DEVBOX_SCRIPTS_PATH_STAGING}" ]; then
   . "${DOCKER_DEVBOX_SCRIPTS_PATH_STAGING}"/.bash_leave.core
 else
   echo "$(tput setaf 1)docker-devbox doesn't seems to be installed ($DOCKER_DEVBOX_SCRIPTS_PATH_STAGING is missing). Check your docker-devbox installation.$(tput sgr0)"
-  echo "$(tput setaf 3)More information at https://github.com/gfi-centre-ouest/docker-devbox$(tput sgr0)"
+  echo "$(tput setaf 3)More information at https://github.com/inetum-orleans/docker-devbox$(tput sgr0)"
 fi
